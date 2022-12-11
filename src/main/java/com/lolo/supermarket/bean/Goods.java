@@ -19,7 +19,6 @@ public class Goods {
     private Date goodCreateTime;
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Date goodUpdateTime;
-
-
+    private int weight;
 
 }

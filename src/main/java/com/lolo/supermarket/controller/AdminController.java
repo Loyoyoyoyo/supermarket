@@ -14,14 +14,50 @@ public class AdminController {
     @Autowired
     GoodService goodService;
 
-    @GetMapping("/retrieve")
-    public Goods testController(@RequestParam("id") int id){
-        return goodService.selectById(id);
+    //3.商品需要按权重在首页进行展示，每类商品展示权重前2的，相同权重则优先选取创建时间晚的
+    @GetMapping("/selectAll")
+    public Goods[] selectAll(){
+        return goodService.selectAll();
     }
 
-    @GetMapping("/type")
-    public List<Goods> testType(@RequestParam("type") String type){
+    //按id查询
+    @GetMapping("/retrieveId")
+    public Goods retrieveId(@RequestParam("id") int id){
+        Goods good = goodService.selectById(id);
+        return good;
+    }
+
+
+    //查询
+    //按种类获取商品，并且按权重进行排序
+    @GetMapping("/retrieveType")
+    public List<Goods> retrieveType(@RequestParam("type") String type){
         return goodService.selectByType(type);
     }
 
+    //创建商品
+    @PostMapping("/create")
+    public String create(Goods goods){
+        return goodService.addGood(goods);
+    }
+
+    //删除商品
+    @GetMapping("/deleteById")
+    public String deleteById(@RequestParam("id") int id){
+       return goodService.deleteById(id);
+    }
+
+    //修改商品权重
+    @GetMapping("/updateWeight")
+    public String updateWeight(@RequestParam("id") int id,
+                               @RequestParam("weight") int weight){
+        return goodService.updateWeight(id,weight);
+
+    }
+    //修改商品名称
+    @GetMapping("/updateName")
+    public String updateName(@RequestParam("id") int id,
+                             @RequestParam("name") String name){
+        return goodService.updateName(id, name);
+    }
 }
