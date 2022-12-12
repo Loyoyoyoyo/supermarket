@@ -4,14 +4,13 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.lolo.supermarket.entity.Goods;
 import com.lolo.supermarket.dao.GoodsMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import javax.annotation.Resource;
 import java.util.List;
 
 @Service
 public class GoodService {
-    @Autowired
+    @Resource
     GoodsMapper goodsMapper;
 
     public Goods[] selectAll() {
