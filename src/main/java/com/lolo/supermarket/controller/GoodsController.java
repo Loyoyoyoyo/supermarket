@@ -1,5 +1,8 @@
 package com.lolo.supermarket.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.lolo.supermarket.common.ResultEnum;
+import com.lolo.supermarket.dao.GoodsMapper;
 import com.lolo.supermarket.entity.Goods;
 import com.lolo.supermarket.service.GoodService;
 import com.lolo.supermarket.util.Result;
@@ -7,12 +10,16 @@ import com.lolo.supermarket.util.ResultGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
 import java.util.List;
 
 @RestController
 public class GoodsController {
     @Autowired
     GoodService goodService;
+
+    @Resource
+    GoodsMapper goodsMapper;
 
     //3.商品需要按权重在首页进行展示，每类商品展示权重前2的，相同权重则优先选取创建时间晚的
     @GetMapping("/retrieve-all")
@@ -23,23 +30,56 @@ public class GoodsController {
 
     //按id查询
     @PostMapping("/retrieve-id")
-    public Result retrieveId(@RequestParam int id) {
-        Goods data = goodService.selectById(id);
+    public Result retrieveId(@RequestBody Goods good) {
+        // 商品不存在
+        if(goodsMapper.selectById(good.getId()) == null){
+            return ResultGenerator.fail(ResultEnum.GOOD_ERROR.getCode(),
+                    ResultEnum.GOOD_ERROR.getMes());
+        }
+        Goods data = goodService.selectById(good);
         return ResultGenerator.successData(data);
     }
 
 
     //查询
     //按种类获取商品，并且按权重进行排序
-    @GetMapping("/retrieve-type")
-    public Result retrieveType(@RequestParam String type) {
-        List<Goods> data = goodService.selectByType(type);
-        return ResultGenerator.successData(data);
+    @PostMapping("/retrieve-type")
+    public Result retrieveType(@RequestBody Goods goods) {
+        //输入为空
+        if (goods.getGoodType() == null) {
+            return ResultGenerator.fail(ResultEnum.EMPTY_ERROR.getCode(),
+                    ResultEnum.EMPTY_ERROR.getMes());
+        }
+        //类别不存在
+        String[] typeList= {"男装","女装","美妆","手机"};
+        for (String type:typeList){
+            if(type.equals(goods.getGoodType())){
+                List<Goods> data = goodService.selectByType(goods);
+                return ResultGenerator.successData(data);
+            }
+        }
+        return ResultGenerator.fail(ResultEnum.TYPE_EROOR.getCode(),
+                ResultEnum.TYPE_EROOR.getMes());
+
+
     }
 
     //8.可以按名称搜索商品，并且按权重排序。支持 按种类搜索、不分种类搜索 两种方式String name, boolean byType, String type
     @PostMapping("/retrieve-name")
     public Result retrieveByName(@RequestBody Goods goods) {
+        //输入为空
+        if (goods.getGoodName() == null) {
+            return ResultGenerator.fail(ResultEnum.EMPTY_ERROR.getCode(),
+                    ResultEnum.EMPTY_ERROR.getMes());
+        }
+        // 商品不存在
+        QueryWrapper<Goods> queryWrapper = new QueryWrapper<>();
+        queryWrapper.like("good_name",goods.getGoodName());
+        if(goodsMapper.selectOne(queryWrapper) == null){
+            return ResultGenerator.fail(ResultEnum.GOOD_ERROR.getCode(),
+                    ResultEnum.GOOD_ERROR.getMes());
+        }
+
         List<Goods> data = goodService.selectByName(goods.getGoodName(), goods.getGoodType());
         return ResultGenerator.successData(data);
     }
@@ -47,30 +87,64 @@ public class GoodsController {
     //创建商品
     @PostMapping("/create")
     public Result create(@RequestBody Goods goods) {
+        //输入为空
+        if (goods.getGoodName() == null ||
+                goods.getGoodType() == null){
+
+            return ResultGenerator.fail(ResultEnum.EMPTY_ERROR.getCode(),
+                    ResultEnum.EMPTY_ERROR.getMes());
+        }
+        //商品已存在
+        QueryWrapper<Goods> queryWrapper = new QueryWrapper<>();
+        queryWrapper.like("good_name",goods.getGoodName());
+        if(goodsMapper.selectOne(queryWrapper) != null){
+            return ResultGenerator.fail(ResultEnum.GOOD_ERROR2.getCode(),
+                    ResultEnum.GOOD_ERROR2.getMes());
+        }
         goodService.addGood(goods);
         int id = goods.getId();
         return ResultGenerator.successMes(id);
     }
 
     //删除商品
-    @GetMapping("/delete-id")
-    public Result deleteById(@RequestBody int id) {
-        goodService.deleteById(id);
+    @PostMapping("/delete-id")
+    public Result deleteById(@RequestBody Goods goods) {
+        // 商品不存在
+        if(goodsMapper.selectById(goods.getId()) == null){
+            return ResultGenerator.fail(ResultEnum.GOOD_ERROR.getCode(),
+                    ResultEnum.GOOD_ERROR.getMes());
+        }
+        goodService.deleteById(goods);
         return ResultGenerator.success();
     }
 
     //修改商品权重
-    @GetMapping("/update-weight")
-    public Result updateWeight(@RequestBody int id,
-                               @RequestBody int weight) {
+    @PostMapping("/update-weight")
+    public Result updateWeight(@RequestBody Goods goods) {
+        // 商品不存在
+        if(goodsMapper.selectById(goods.getId()) == null){
+            return ResultGenerator.fail(ResultEnum.GOOD_ERROR.getCode(),
+                    ResultEnum.GOOD_ERROR.getMes());
+        }
+        goodService.updateWeight(goods);
         return ResultGenerator.success();
 
     }
 
     //修改商品名称
-    @GetMapping("/update-name")
-    public Result updateName(@RequestBody int id,
-                             @RequestBody String name) {
+    @PostMapping("/update-name")
+    public Result updateName(@RequestBody Goods goods) {
+        //输入为空
+        if (goods.getGoodName() == null) {
+            return ResultGenerator.fail(ResultEnum.EMPTY_ERROR.getCode(),
+                    ResultEnum.EMPTY_ERROR.getMes());
+        }
+        // 商品不存在
+        if(goodsMapper.selectById(goods.getId()) == null){
+            return ResultGenerator.fail(ResultEnum.GOOD_ERROR.getCode(),
+                    ResultEnum.GOOD_ERROR.getMes());
+        }
+        goodService.updateName(goods);
         return ResultGenerator.success();
     }
 }

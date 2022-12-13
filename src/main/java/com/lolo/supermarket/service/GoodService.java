@@ -30,23 +30,19 @@ public class GoodService {
         return result;
     }
 
-    public Goods selectById(int id) {
-//        QueryWrapper<Goods> userQueryWrapper = new QueryWrapper<>();
-//        // 选择type为某种类型的数据
-//        userQueryWrapper.like("id",id);
+    public Goods selectById(Goods goods) {
 
-        System.out.println((goodsMapper.selectById(id)));
-        return goodsMapper.selectById(id);
+        return goodsMapper.selectById(goods.getId());
 
     }
 
     /**
      * 按种类获取商品，并且按权重进行排序
      */
-    public List<Goods> selectByType(String type) {
+    public List<Goods> selectByType(Goods goods) {
         QueryWrapper<Goods> userQueryWrapper = new QueryWrapper<>();
         // 选择type为某种类型的数据
-        userQueryWrapper.like("good_type", type);
+        userQueryWrapper.like("good_type", goods.getGoodType());
         // 按权重递减
         userQueryWrapper.orderByDesc("weight");
         List<Goods> goodList = goodsMapper.selectList(userQueryWrapper);
@@ -71,25 +67,25 @@ public class GoodService {
         return "ok";
     }
 
-    public void deleteById(int id) {
-        goodsMapper.deleteById(id);
+    public void deleteById(Goods goods) {
+        goodsMapper.deleteById(goods.getId());
         return;
     }
 
-    public String updateWeight(int id, int weight) {
+    public String updateWeight(Goods goods) {
         Goods good = new Goods();
         UpdateWrapper<Goods> updateWrapper = new UpdateWrapper<>();
-        updateWrapper.set("weight", weight)
-                .eq("id", id);
+        updateWrapper.set("weight", goods.getWeight())
+                .eq("id", goods.getId());
         goodsMapper.update(good, updateWrapper);
         return "ok";
     }
 
-    public String updateName(int id, String name) {
-        Goods goods = new Goods();
+    public String updateName(Goods goods) {
+        Goods goods1 = new Goods();
         UpdateWrapper<Goods> updateWrapper = new UpdateWrapper<>();
-        updateWrapper.set("good_name", name).eq("id", id);
-        goodsMapper.update(goods, updateWrapper);
+        updateWrapper.set("good_name", goods.getGoodName()).eq("id", goods.getId());
+        goodsMapper.update(goods1, updateWrapper);
         return "ok";
     }
 }
