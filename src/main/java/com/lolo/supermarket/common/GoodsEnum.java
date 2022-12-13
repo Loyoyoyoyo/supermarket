@@ -2,7 +2,10 @@ package com.lolo.supermarket.common;
 
 public enum GoodsEnum {
     success(10000,"成功"),
-    UNKNOWN_ERROR(-1,"未知错误");
+    USER_ERROR(-1,"用户不存在"),
+    USER_ERROR2(-2,"用户已存在"),
+    EMAIL_ERROR(-3,"邮箱格式错误"),
+    PASS_ERROR(1,"密码错误");
 
     private int code;
     private String mes;

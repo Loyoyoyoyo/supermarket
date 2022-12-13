@@ -29,10 +29,10 @@ public class ResultGenerator {
     }
 
     //失败无数据
-    public static Result fail(){
+    public static Result fail(int code,String message ){
         Result result = new Result();
-        result.setResultCode(GoodsEnum.success.getCode());
-        result.setMessage(GoodsEnum.success.getMes());
+        result.setResultCode(code);
+        result.setMessage(message);
         return result;
     }
     //失败无数据且自定义message
