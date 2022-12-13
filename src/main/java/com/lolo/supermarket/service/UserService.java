@@ -15,6 +15,11 @@ public class UserService {
     @Resource
     UserMapper userMapper;
 
+    /**
+     * 注册
+     * @param user
+     * @return
+     */
     public int signUp(User user) {
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         //邮箱存在
@@ -26,6 +31,22 @@ public class UserService {
         return 0;
     }
 
+    /**
+     * 重置密码
+     */
+    public int rePass(User user){
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        User user1 = new User();
+        //用户不存在
+        if(queryWrapper.select("email",user.getEmail()) == null){
+            return -1;
+        }
+        UpdateWrapper<User> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.set("password",user.getPassword())
+                .eq("email",user.getEmail());
+        userMapper.update(user1,updateWrapper);
+        return 0;
+    }
     /**
      * 登录
      * @param user
