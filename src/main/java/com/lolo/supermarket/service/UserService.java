@@ -62,7 +62,7 @@ public class UserService {
             return -1;
         }else{
             // 密码正确
-            if(user1.getPassword()==user.getPassword()){
+            if(user1.getPassword().equals(user.getPassword())){
                 return 0;
             // 密码错误
             }else{

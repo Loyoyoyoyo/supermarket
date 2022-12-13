@@ -6,11 +6,15 @@ import com.lolo.supermarket.service.UserService;
 import com.lolo.supermarket.util.Result;
 import com.lolo.supermarket.util.ResultGenerator;
 import com.lolo.supermarket.util.Valid;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
 
 
 @RestController
@@ -18,7 +22,7 @@ public class UserController {
 
     @Resource
     UserService userService;
-
+    //注册
     @PostMapping("/signUp")
     public Result signUp(@RequestBody User user) {
         //为空
@@ -46,8 +50,9 @@ public class UserController {
 
     }
 
+    //登录
     @PostMapping("/signIn")
-    public Result signIn(@RequestBody User user) {
+    public Result signIn(@RequestBody User user, HttpServletResponse response) {
         int result = userService.signIn(user);
         //为空
         if (user.getEmail() == null || user.getPassword() == null) {
@@ -64,6 +69,8 @@ public class UserController {
             return ResultGenerator.fail(ResultEnum.PASS_ERROR.getCode(),
                     ResultEnum.PASS_ERROR.getMes());
         }
+        //给cookie
+        response.addCookie(new Cookie("login","true"));
         return ResultGenerator.success();
 
     }
@@ -84,4 +91,6 @@ public class UserController {
             return ResultGenerator.success();
         }
     }
+
+
 }
