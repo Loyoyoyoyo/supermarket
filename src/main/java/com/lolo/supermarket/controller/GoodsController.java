@@ -48,8 +48,8 @@ public class GoodsController {
     public Result retrieveType(@RequestBody Goods goods) {
         //输入为空
         if (goods.getGoodType() == null) {
-            return ResultGenerator.fail(ResultEnum.EMPTY_ERROR.getCode(),
-                    ResultEnum.EMPTY_ERROR.getMes());
+            return ResultGenerator.fail(ResultEnum.PARAM_ERROR.getCode(),
+                    ResultEnum.PARAM_ERROR.getMes());
         }
         //类别不存在
         String[] typeList= {"男装","女装","美妆","手机"};
@@ -70,8 +70,8 @@ public class GoodsController {
     public Result retrieveByName(@RequestBody Goods goods) {
         //输入为空
         if (goods.getGoodName() == null) {
-            return ResultGenerator.fail(ResultEnum.EMPTY_ERROR.getCode(),
-                    ResultEnum.EMPTY_ERROR.getMes());
+            return ResultGenerator.fail(ResultEnum.PARAM_ERROR.getCode(),
+                    ResultEnum.PARAM_ERROR.getMes());
         }
         // 商品不存在
         QueryWrapper<Goods> queryWrapper = new QueryWrapper<>();
@@ -92,8 +92,8 @@ public class GoodsController {
         if (goods.getGoodName() == null ||
                 goods.getGoodType() == null){
 
-            return ResultGenerator.fail(ResultEnum.EMPTY_ERROR.getCode(),
-                    ResultEnum.EMPTY_ERROR.getMes());
+            return ResultGenerator.fail(ResultEnum.PARAM_ERROR.getCode(),
+                    ResultEnum.PARAM_ERROR.getMes());
         }
         //商品已存在
         QueryWrapper<Goods> queryWrapper = new QueryWrapper<>();
@@ -137,8 +137,8 @@ public class GoodsController {
     public Result updateName(@RequestBody Goods goods) {
         //输入为空
         if (goods.getGoodName() == null) {
-            return ResultGenerator.fail(ResultEnum.EMPTY_ERROR.getCode(),
-                    ResultEnum.EMPTY_ERROR.getMes());
+            return ResultGenerator.fail(ResultEnum.PARAM_ERROR.getCode(),
+                    ResultEnum.PARAM_ERROR.getMes());
         }
         // 商品不存在
         if(goodsMapper.selectById(goods.getId()) == null){

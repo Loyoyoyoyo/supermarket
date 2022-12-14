@@ -17,9 +17,10 @@ public class LoginInterceptor implements HandlerInterceptor {
     @ResponseBody
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        log.info("拦截good请求");
+        log.info("拦截请求{}",request.getServletPath());
         if(request.getCookies() == null){
             response.setCharacterEncoding("utf-8");
+            response.setContentType("application/json");
             response.getWriter().write("请先登录！");
             return false;
         }
@@ -30,7 +31,8 @@ public class LoginInterceptor implements HandlerInterceptor {
                 return true;
             }
         }
-        response.sendRedirect(request.getContextPath()+"/signIn");
+        response.setCharacterEncoding("utf-8");
+        response.getWriter().write("请先登录！");
         return false;
     }
 

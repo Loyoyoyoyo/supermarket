@@ -31,13 +31,13 @@ public class UserController {
                 user.getUsername() == null ||
                 user.getPhone() == null){
 
-            return ResultGenerator.fail(ResultEnum.EMPTY_ERROR.getCode(),
-                    ResultEnum.EMPTY_ERROR.getMes());
+            return ResultGenerator.fail(ResultEnum.PARAM_ERROR.getCode(),
+                    ResultEnum.PARAM_ERROR.getMes());
         }
         //邮箱格式
         if (!Valid.isValidEmail(user.getEmail())) {
-            return ResultGenerator.fail(ResultEnum.EMAIL_ERROR.getCode(),
-                    ResultEnum.EMAIL_ERROR.getMes());
+            return ResultGenerator.fail(ResultEnum.PARAM_ERROR.getCode(),
+                    ResultEnum.PARAM_ERROR.getMes());
         }
         int result = userService.signUp(user);
         //用户已存在
@@ -53,12 +53,14 @@ public class UserController {
     //登录
     @PostMapping("/signIn")
     public Result signIn(@RequestBody User user, HttpServletResponse response) {
-        int result = userService.signIn(user);
         //为空
         if (user.getEmail() == null || user.getPassword() == null) {
-            return ResultGenerator.fail(ResultEnum.EMPTY_ERROR.getCode(),
-                    ResultEnum.EMPTY_ERROR.getMes());
+            return ResultGenerator.fail(ResultEnum.PARAM_ERROR.getCode(),
+                    ResultEnum.PARAM_ERROR.getMes());
         }
+
+        int result = userService.signIn(user);
+
         //用户不存在
         if (result == -1) {
             return ResultGenerator.fail(ResultEnum.USER_ERROR.getCode(),
@@ -79,8 +81,8 @@ public class UserController {
     public Result rePass(@RequestBody User user) {
         //为空
         if (user.getEmail() == null) {
-            return ResultGenerator.fail(ResultEnum.EMPTY_ERROR.getCode(),
-                    ResultEnum.EMPTY_ERROR.getMes());
+            return ResultGenerator.fail(ResultEnum.PARAM_ERROR.getCode(),
+                    ResultEnum.PARAM_ERROR.getMes());
         }
         int result = userService.rePass(user);
         //用户不存在
