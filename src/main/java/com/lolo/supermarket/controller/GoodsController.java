@@ -160,4 +160,7 @@ public class GoodsController {
         goodService.updateStock(goods);
         return ResultGenerator.success();
     }
+
+    // 购物车：加入购物车
+
 }

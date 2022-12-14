@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 
@@ -52,7 +53,7 @@ public class UserController {
 
     //登录
     @PostMapping("/sign-in")
-    public Result signIn(@RequestBody User user, HttpServletResponse response) {
+    public Result signIn(@RequestBody User user, HttpServletRequest req) {
         //为空
         if (user.getEmail() == null || user.getPassword() == null) {
             return ResultGenerator.fail(ResultEnum.PARAM_ERROR.getCode(),
@@ -72,7 +73,7 @@ public class UserController {
                     ResultEnum.PASS_ERROR.getMes());
         }
         //给cookie
-        response.addCookie(new Cookie("login","true"));
+        req.getSession().setAttribute("user",user);
         return ResultGenerator.success();
 
     }
