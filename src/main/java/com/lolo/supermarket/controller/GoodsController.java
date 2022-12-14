@@ -148,4 +148,16 @@ public class GoodsController {
         goodService.updateName(goods);
         return ResultGenerator.success();
     }
+
+    //修改库存
+    @PostMapping("/update-stock")
+    public Result updateStock(@RequestBody Goods goods){
+        // 商品不存在
+        if(goodsMapper.selectById(goods.getId()) == null){
+            return ResultGenerator.fail(ResultEnum.GOOD_ERROR.getCode(),
+                    ResultEnum.GOOD_ERROR.getMes());
+        }
+        goodService.updateStock(goods);
+        return ResultGenerator.success();
+    }
 }

@@ -88,4 +88,16 @@ public class GoodService {
         goodsMapper.update(goods1, updateWrapper);
         return "ok";
     }
+
+    /**
+     * 修改库存
+     */
+    public void updateStock(Goods goods){
+        Goods goods1 = new Goods();
+        UpdateWrapper<Goods> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.set("stock", goods.getStock()).eq("id", goods.getId());
+        goodsMapper.update(goods1, updateWrapper);
+
+    }
+
 }

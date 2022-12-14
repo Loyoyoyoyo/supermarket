@@ -23,7 +23,7 @@ public class UserController {
     @Resource
     UserService userService;
     //注册
-    @PostMapping("/signUp")
+    @PostMapping("/sign-up")
     public Result signUp(@RequestBody User user) {
         //为空
         if (user.getEmail() == null ||
@@ -51,7 +51,7 @@ public class UserController {
     }
 
     //登录
-    @PostMapping("/signIn")
+    @PostMapping("/sign-in")
     public Result signIn(@RequestBody User user, HttpServletResponse response) {
         //为空
         if (user.getEmail() == null || user.getPassword() == null) {
@@ -77,7 +77,7 @@ public class UserController {
 
     }
 
-    @PostMapping("/rePass")
+    @PostMapping("/re-pass")
     public Result rePass(@RequestBody User user) {
         //为空
         if (user.getEmail() == null) {
