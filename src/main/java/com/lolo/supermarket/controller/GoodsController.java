@@ -2,8 +2,10 @@ package com.lolo.supermarket.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.lolo.supermarket.common.ResultEnum;
+import com.lolo.supermarket.dao.GoodCarMapper;
 import com.lolo.supermarket.dao.GoodsMapper;
 import com.lolo.supermarket.entity.Goods;
+import com.lolo.supermarket.entity.UserCar;
 import com.lolo.supermarket.service.GoodService;
 import com.lolo.supermarket.util.Result;
 import com.lolo.supermarket.util.ResultGenerator;
@@ -25,7 +27,7 @@ public class GoodsController {
     //3.商品需要按权重在首页进行展示，每类商品展示权重前2的，相同权重则优先选取创建时间晚的
     @GetMapping("/retrieve-all")
     public Result retrieveAll() {
-        Goods[] data =  goodService.selectAll();
+        Goods[] data = goodService.selectAll();
         return ResultGenerator.successData(data);
     }
 
@@ -33,7 +35,7 @@ public class GoodsController {
     @PostMapping("/retrieve-id")
     public Result retrieveId(@RequestBody Goods good) {
         // 商品不存在
-        if(goodsMapper.selectById(good.getId()) == null){
+        if (goodsMapper.selectById(good.getId()) == null) {
             return ResultGenerator.fail(ResultEnum.GOOD_ERROR.getCode(),
                     ResultEnum.GOOD_ERROR.getMes());
         }
@@ -52,9 +54,9 @@ public class GoodsController {
                     ResultEnum.PARAM_ERROR.getMes());
         }
         //类别不存在
-        String[] typeList= {"男装","女装","美妆","手机"};
-        for (String type:typeList){
-            if(type.equals(goods.getGoodType())){
+        String[] typeList = {"男装", "女装", "美妆", "手机"};
+        for (String type : typeList) {
+            if (type.equals(goods.getGoodType())) {
                 List<Goods> data = goodService.selectByType(goods);
                 return ResultGenerator.successData(data);
             }
@@ -75,8 +77,8 @@ public class GoodsController {
         }
         // 商品不存在
         QueryWrapper<Goods> queryWrapper = new QueryWrapper<>();
-        queryWrapper.like("good_name",goods.getGoodName());
-        if(goodsMapper.selectOne(queryWrapper) == null){
+        queryWrapper.like("good_name", goods.getGoodName());
+        if (goodsMapper.selectOne(queryWrapper) == null) {
             return ResultGenerator.fail(ResultEnum.GOOD_ERROR.getCode(),
                     ResultEnum.GOOD_ERROR.getMes());
         }
@@ -90,15 +92,15 @@ public class GoodsController {
     public Result create(@RequestBody Goods goods) {
         //输入为空
         if (goods.getGoodName() == null ||
-                goods.getGoodType() == null){
+                goods.getGoodType() == null) {
 
             return ResultGenerator.fail(ResultEnum.PARAM_ERROR.getCode(),
                     ResultEnum.PARAM_ERROR.getMes());
         }
         //商品已存在
         QueryWrapper<Goods> queryWrapper = new QueryWrapper<>();
-        queryWrapper.like("good_name",goods.getGoodName());
-        if(goodsMapper.selectOne(queryWrapper) != null){
+        queryWrapper.like("good_name", goods.getGoodName());
+        if (goodsMapper.selectOne(queryWrapper) != null) {
             return ResultGenerator.fail(ResultEnum.GOOD_ERROR2.getCode(),
                     ResultEnum.GOOD_ERROR2.getMes());
         }
@@ -111,7 +113,7 @@ public class GoodsController {
     @PostMapping("/delete-id")
     public Result deleteById(@RequestBody Goods goods) {
         // 商品不存在
-        if(goodsMapper.selectById(goods.getId()) == null){
+        if (goodsMapper.selectById(goods.getId()) == null) {
             return ResultGenerator.fail(ResultEnum.GOOD_ERROR.getCode(),
                     ResultEnum.GOOD_ERROR.getMes());
         }
@@ -123,7 +125,7 @@ public class GoodsController {
     @PostMapping("/update-weight")
     public Result updateWeight(@RequestBody Goods goods) {
         // 商品不存在
-        if(goodsMapper.selectById(goods.getId()) == null){
+        if (goodsMapper.selectById(goods.getId()) == null) {
             return ResultGenerator.fail(ResultEnum.GOOD_ERROR.getCode(),
                     ResultEnum.GOOD_ERROR.getMes());
         }
@@ -141,7 +143,7 @@ public class GoodsController {
                     ResultEnum.PARAM_ERROR.getMes());
         }
         // 商品不存在
-        if(goodsMapper.selectById(goods.getId()) == null){
+        if (goodsMapper.selectById(goods.getId()) == null) {
             return ResultGenerator.fail(ResultEnum.GOOD_ERROR.getCode(),
                     ResultEnum.GOOD_ERROR.getMes());
         }
@@ -151,9 +153,9 @@ public class GoodsController {
 
     //修改库存
     @PostMapping("/update-stock")
-    public Result updateStock(@RequestBody Goods goods){
+    public Result updateStock(@RequestBody Goods goods) {
         // 商品不存在
-        if(goodsMapper.selectById(goods.getId()) == null){
+        if (goodsMapper.selectById(goods.getId()) == null) {
             return ResultGenerator.fail(ResultEnum.GOOD_ERROR.getCode(),
                     ResultEnum.GOOD_ERROR.getMes());
         }
@@ -162,5 +164,21 @@ public class GoodsController {
     }
 
     // 购物车：加入购物车
+    @PostMapping("/create-car-good")
+    public Result createCarGood(@RequestBody UserCar userCar) {
+        int result = goodService.createCarGood(userCar);
+        if (result == -1) {
+            return ResultGenerator.fail(ResultEnum.STOCK_ERROR.getCode(),
+                    ResultEnum.STOCK_ERROR.getMes());
+        } else {
+            return ResultGenerator.success();
+        }
+    }
 
+    //修改购物车内商品的数量
+    @PostMapping("/update-car-good-num")
+    public Result updateCarGoodNum(@RequestBody UserCar userCar) {
+        goodService.updateCarGoodNum(userCar);
+        return ResultGenerator.success();
+    }
 }

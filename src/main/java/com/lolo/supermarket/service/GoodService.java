@@ -2,16 +2,28 @@ package com.lolo.supermarket.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.lolo.supermarket.controller.GoodsController;
 import com.lolo.supermarket.entity.Goods;
 import com.lolo.supermarket.dao.GoodsMapper;
+import com.lolo.supermarket.dao.GoodCarMapper;
+import com.lolo.supermarket.entity.User;
+import com.lolo.supermarket.entity.UserCar;
 import org.springframework.stereotype.Service;
+
 import javax.annotation.Resource;
+import javax.management.QueryEval;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.util.List;
 
 @Service
 public class GoodService {
     @Resource
     GoodsMapper goodsMapper;
+    @Resource
+    GoodCarMapper goodCarMapper;
+    @Resource
+    HttpServletRequest httpServletRequest;
 
     public Goods[] selectAll() {
         String[] types = {"女装", "男装", "手机", "美妆"};
@@ -54,7 +66,7 @@ public class GoodService {
         QueryWrapper<Goods> queryWrapper = new QueryWrapper<>();
         queryWrapper.like("good_name", name).orderByDesc("weight");
 
-        if (type != null ) {
+        if (type != null) {
             queryWrapper.like("good_type", type);
         }
 
@@ -62,7 +74,6 @@ public class GoodService {
     }
 
     public String addGood(Goods good) {
-        QueryWrapper<Goods> userQueryWrapper = new QueryWrapper<>();
         goodsMapper.insert(good);
         return "ok";
     }
@@ -92,12 +103,65 @@ public class GoodService {
     /**
      * 修改库存
      */
-    public void updateStock(Goods goods){
+    public void updateStock(Goods goods) {
         Goods goods1 = new Goods();
         UpdateWrapper<Goods> updateWrapper = new UpdateWrapper<>();
         updateWrapper.set("stock", goods.getStock()).eq("id", goods.getId());
         goodsMapper.update(goods1, updateWrapper);
+    }
 
+    /**
+     * 库存-1
+     * @param userCar
+     */
+    public void cutStock(UserCar userCar) {
+       Goods good = goodsMapper.selectById(userCar.getGoodId());
+       Goods good1 = new Goods();
+       UpdateWrapper<Goods> updateWrapper = new UpdateWrapper<>();
+       updateWrapper.set("stock", good.getStock() - 1)
+                .eq("id", userCar.getGoodId());
+       goodsMapper.update(good1,updateWrapper);
+    }
+
+    /**
+     * 添加进购物车
+     */
+    public int createCarGood(UserCar userCar) {
+        //TODO 判断库存
+        Goods good = goodsMapper.selectById(userCar.getGoodId());
+        if(good.getStock() == 0){
+            return -1;
+        }
+
+        QueryWrapper<UserCar> queryWrapper = new QueryWrapper<>();
+        //1.获取了该用户的id
+        User user = (User) httpServletRequest.getSession().getAttribute("user");
+        //2.用户id+商品id筛选
+        queryWrapper.eq("user_id", user.getId())
+                .eq("good_id", userCar.getGoodId());
+        UserCar userCar1 = goodCarMapper.selectOne(queryWrapper);
+        //已存在，就增加数量
+        if (userCar1 != null) {
+            this.cutStock(userCar);
+            userCar1.setGoodNum(userCar1.getGoodNum() + 1);
+            goodCarMapper.updateById(userCar1);
+            //不存在，就新建
+            return 1;
+        } else {
+            this.cutStock(userCar);
+            userCar.setUserId(user.getId());
+            userCar.setGoodNum(1);
+            goodCarMapper.insert(userCar);
+            return 1;
+        }
+    }
+
+    /**
+     * 修改购物车内商品的数量
+     */
+    public void updateCarGoodNum(UserCar userCar) {
+        goodCarMapper.updateById(userCar);
+        //TODO 不能超过库存
     }
 
 }

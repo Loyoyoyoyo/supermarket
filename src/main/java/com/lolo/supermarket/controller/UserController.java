@@ -1,6 +1,8 @@
 package com.lolo.supermarket.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.lolo.supermarket.common.ResultEnum;
+import com.lolo.supermarket.dao.UserMapper;
 import com.lolo.supermarket.entity.User;
 import com.lolo.supermarket.service.UserService;
 import com.lolo.supermarket.util.Result;
@@ -23,6 +25,9 @@ public class UserController {
 
     @Resource
     UserService userService;
+    @Resource
+    UserMapper userMapper;
+
     //注册
     @PostMapping("/sign-up")
     public Result signUp(@RequestBody User user) {
@@ -73,7 +78,10 @@ public class UserController {
                     ResultEnum.PASS_ERROR.getMes());
         }
         //给cookie
-        req.getSession().setAttribute("user",user);
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("email",user.getEmail());
+        User user1 = userMapper.selectOne(queryWrapper);
+        req.getSession().setAttribute("user",user1);
         return ResultGenerator.success();
 
     }

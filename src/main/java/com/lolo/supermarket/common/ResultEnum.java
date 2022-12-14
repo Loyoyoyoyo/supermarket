@@ -8,7 +8,8 @@ public enum ResultEnum {
     PASS_ERROR(-3,"密码错误"),
     GOOD_ERROR(-11,"商品不存在"),
     GOOD_ERROR2(-22,"商品已存在"),
-    TYPE_EROOR(-33,"商品类别不存在");
+    TYPE_EROOR(-33,"商品类别不存在"),
+    STOCK_ERROR(-44,"商品库存不足");
 
 
     private int code;
