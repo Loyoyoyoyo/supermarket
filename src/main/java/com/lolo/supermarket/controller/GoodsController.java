@@ -5,6 +5,7 @@ import com.lolo.supermarket.common.ResultEnum;
 import com.lolo.supermarket.dao.GoodsMapper;
 import com.lolo.supermarket.entity.Goods;
 import com.lolo.supermarket.entity.GoodCar;
+import com.lolo.supermarket.entity.Orders;
 import com.lolo.supermarket.service.GoodService;
 import com.lolo.supermarket.util.Result;
 import com.lolo.supermarket.util.ResultGenerator;
@@ -194,5 +195,15 @@ public class GoodsController {
         goodService.orders(goodCar);
         return ResultGenerator.success();
 
+    }
+    //查看订单
+    @GetMapping("/retrieve-orders")
+    public Result retrieveOrders(){
+        return ResultGenerator.successData(goodService.retrieveOrders());
+    }
+    //查看任意订单
+    @PostMapping("/retrieve-all-orders")
+    public Result retrieveAllOrders(@RequestBody Orders orders){
+        return ResultGenerator.successData(goodService.retrieveAllOrders(orders));
     }
 }

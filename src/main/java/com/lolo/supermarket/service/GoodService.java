@@ -27,7 +27,10 @@ public class GoodService {
     HttpServletRequest httpServletRequest;
 
 
-
+    /**
+     *
+     * @return
+     */
     public Goods[] selectAll() {
         String[] types = {"女装", "男装", "手机", "美妆"};
         Goods[] result = new Goods[8];
@@ -45,6 +48,11 @@ public class GoodService {
         return result;
     }
 
+    /**
+     * 按id查商品
+     * @param goods
+     * @return
+     */
     public Goods selectById(Goods goods) {
 
         return goodsMapper.selectById(goods.getId());
@@ -52,7 +60,7 @@ public class GoodService {
     }
 
     /**
-     * 按种类获取商品，并且按权重进行排序
+     * 按种类查商品，并且按权重进行排序
      */
     public List<Goods> selectByType(Goods goods) {
         QueryWrapper<Goods> userQueryWrapper = new QueryWrapper<>();
@@ -64,7 +72,13 @@ public class GoodService {
         return goodList;
     }
 
-    //8.可以按名称搜索商品，并且按权重排序。支持 按种类搜索、不分种类搜索 两种方式
+
+    /**
+     * 可以按名称搜索商品，并且按权重排序。支持 按种类搜索、不分种类搜索 两种方式
+     * @param name
+     * @param type
+     * @return
+     */
     public List<Goods> selectByName(String name, Object type) {
         QueryWrapper<Goods> queryWrapper = new QueryWrapper<>();
         queryWrapper.like("good_name", name).orderByDesc("weight");
@@ -76,16 +90,31 @@ public class GoodService {
         return goodsMapper.selectList(queryWrapper);
     }
 
+    /**
+     * 管理员可以添加商品
+     * @param good
+     * @return
+     */
     public String addGood(Goods good) {
         goodsMapper.insert(good);
         return "ok";
     }
 
+    /**
+     * 管理员可以删除商品
+     * @param goods
+     */
     public void deleteById(Goods goods) {
         goodsMapper.deleteById(goods.getId());
         return;
     }
 
+
+    /**
+     * 管理员可以修改商品权重
+     * @param goods
+     * @return
+     */
     public String updateWeight(Goods goods) {
         Goods good = new Goods();
         UpdateWrapper<Goods> updateWrapper = new UpdateWrapper<>();
@@ -95,6 +124,11 @@ public class GoodService {
         return "ok";
     }
 
+    /**
+     * 管理员可以修改商品名称
+     * @param goods
+     * @return
+     */
     public String updateName(Goods goods) {
         Goods goods1 = new Goods();
         UpdateWrapper<Goods> updateWrapper = new UpdateWrapper<>();
@@ -104,7 +138,7 @@ public class GoodService {
     }
 
     /**
-     * 修改库存
+     * 管理员可以增、减库存
      */
     public void updateStock(Goods goods) {
         Goods goods1 = goodsMapper.selectById(goods.getId());
@@ -112,21 +146,9 @@ public class GoodService {
         goodsMapper.updateById(goods1);
     }
 
-    /**
-     * 库存-1
-     *
-     * @param goodCar
-     */
-    public void cutStock(GoodCar goodCar, int num) {
-        Goods good = goodsMapper.selectById(goodCar.getGoodId());
-        UpdateWrapper<Goods> updateWrapper = new UpdateWrapper<>();
-        updateWrapper.set("stock", good.getStock() + num)
-                .eq("id", goodCar.getGoodId());
-        goodsMapper.update(good, updateWrapper);
-    }
 
     /**
-     * 添加进购物车
+     * 3.用户可以添加商品进购物车
      */
     public int createCarGood(GoodCar goodCar) {
         //判断库存
@@ -187,6 +209,10 @@ public class GoodService {
         }
     }
 
+    /**
+     * 增加订单记录，用户购买后，记录用户的购买信息（忽略用户付款，后续增加）
+     * @param goodCar
+     */
     public void orders(GoodCar goodCar){
         //session获取用户id
         User user = (User) httpServletRequest.getSession().getAttribute("user");
@@ -214,4 +240,27 @@ public class GoodService {
         goods.setStock(goods.getStock()-goodCar.getGoodNum());
         goodsMapper.updateById(goods);
     }
+
+    /**
+     * 用户可以查看自己的订单
+     */
+    public List<Orders> retrieveOrders(){
+        //session获取用户id
+        User user = (User) httpServletRequest.getSession().getAttribute("user");
+        QueryWrapper<Orders> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("user_id",user.getId());
+        List<Orders> ordersList = ordersMapper.selectList(queryWrapper);
+        return ordersList;
+    }
+
+    /**
+     * 管理员可以查看任意用户的订单
+     */
+    public List<Orders> retrieveAllOrders(Orders orders){
+        QueryWrapper<Orders> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("user_id",orders.getUserId());
+        List<Orders> ordersList = ordersMapper.selectList(queryWrapper);
+        return ordersList;
+    }
+
 }
