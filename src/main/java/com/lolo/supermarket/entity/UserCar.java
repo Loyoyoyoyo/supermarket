@@ -1,9 +1,8 @@
 package com.lolo.supermarket.entity;
-
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
-
 import java.util.Date;
+
 @Data
 @TableName("user_car")
 public class UserCar {

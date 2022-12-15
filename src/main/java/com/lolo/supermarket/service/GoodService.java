@@ -104,51 +104,48 @@ public class GoodService {
      * 修改库存
      */
     public void updateStock(Goods goods) {
-        Goods goods1 = new Goods();
-        UpdateWrapper<Goods> updateWrapper = new UpdateWrapper<>();
-        updateWrapper.set("stock", goods.getStock()).eq("id", goods.getId());
-        goodsMapper.update(goods1, updateWrapper);
+        Goods goods1 = goodsMapper.selectById(goods.getId());
+        goods1.setStock(goods.getStock());
+        goodsMapper.updateById(goods1);
     }
 
     /**
      * 库存-1
+     *
      * @param userCar
      */
-    public void cutStock(UserCar userCar) {
-       Goods good = goodsMapper.selectById(userCar.getGoodId());
-       Goods good1 = new Goods();
-       UpdateWrapper<Goods> updateWrapper = new UpdateWrapper<>();
-       updateWrapper.set("stock", good.getStock() - 1)
+    public void cutStock(UserCar userCar, int num) {
+        Goods good = goodsMapper.selectById(userCar.getGoodId());
+        UpdateWrapper<Goods> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.set("stock", good.getStock() + num)
                 .eq("id", userCar.getGoodId());
-       goodsMapper.update(good1,updateWrapper);
+        goodsMapper.update(good, updateWrapper);
     }
 
     /**
      * 添加进购物车
      */
     public int createCarGood(UserCar userCar) {
-        //TODO 判断库存
-        Goods good = goodsMapper.selectById(userCar.getGoodId());
-        if(good.getStock() == 0){
+        //判断库存
+        int stock = goodsMapper.selectById(userCar.getGoodId()).getStock();
+        if (stock == 0) {
             return -1;
         }
 
         QueryWrapper<UserCar> queryWrapper = new QueryWrapper<>();
-        //1.获取了该用户的id
+        //session获取用户id
         User user = (User) httpServletRequest.getSession().getAttribute("user");
-        //2.用户id+商品id筛选
+        //用户id+商品id筛选userCar1
         queryWrapper.eq("user_id", user.getId())
                 .eq("good_id", userCar.getGoodId());
         UserCar userCar1 = goodCarMapper.selectOne(queryWrapper);
         //已存在，就增加数量
         if (userCar1 != null) {
-            this.cutStock(userCar);
             userCar1.setGoodNum(userCar1.getGoodNum() + 1);
             goodCarMapper.updateById(userCar1);
-            //不存在，就新建
             return 1;
+        //不存在，就新建
         } else {
-            this.cutStock(userCar);
             userCar.setUserId(user.getId());
             userCar.setGoodNum(1);
             goodCarMapper.insert(userCar);
@@ -159,9 +156,31 @@ public class GoodService {
     /**
      * 修改购物车内商品的数量
      */
-    public void updateCarGoodNum(UserCar userCar) {
-        goodCarMapper.updateById(userCar);
-        //TODO 不能超过库存
+    public boolean updateCarGoodNum(UserCar userCar) {
+        //session获取用户id
+        User user = (User) httpServletRequest.getSession().getAttribute("user");
+        //获取用户购物车该商品的原本数量
+        QueryWrapper<UserCar> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("user_id", user.getId())
+                .eq("good_id", userCar.getGoodId());
+        UserCar userCar1 = goodCarMapper.selectOne(queryWrapper);
+        // 1.增加购物车数量
+        if (userCar.getGoodNum() > userCar1.getGoodNum()) {
+            //判断库存
+            int stock = goodsMapper.selectById(userCar.getGoodId()).getStock();
+            //库存不足
+            if (stock < userCar.getGoodNum()) {
+                return false;
+            } else {
+                userCar1.setGoodNum(userCar.getGoodNum());
+                goodCarMapper.updateById(userCar1);
+                return true;
+            }
+            //2不变、减少购物车数量
+        } else {
+            userCar1.setGoodNum(userCar.getGoodNum());
+            goodCarMapper.updateById(userCar1);
+            return true;
+        }
     }
-
 }

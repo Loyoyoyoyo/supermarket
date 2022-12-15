@@ -178,7 +178,13 @@ public class GoodsController {
     //修改购物车内商品的数量
     @PostMapping("/update-car-good-num")
     public Result updateCarGoodNum(@RequestBody UserCar userCar) {
-        goodService.updateCarGoodNum(userCar);
-        return ResultGenerator.success();
+        boolean result = goodService.updateCarGoodNum(userCar);
+        if(result == true){
+            return ResultGenerator.success();
+        }else{
+            return ResultGenerator.fail(ResultEnum.STOCK_ERROR.getCode(),
+                    ResultEnum.STOCK_ERROR.getMes());
+        }
+
     }
 }
