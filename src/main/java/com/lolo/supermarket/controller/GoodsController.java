@@ -2,16 +2,14 @@ package com.lolo.supermarket.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.lolo.supermarket.common.ResultEnum;
-import com.lolo.supermarket.dao.GoodCarMapper;
 import com.lolo.supermarket.dao.GoodsMapper;
 import com.lolo.supermarket.entity.Goods;
-import com.lolo.supermarket.entity.UserCar;
+import com.lolo.supermarket.entity.GoodCar;
 import com.lolo.supermarket.service.GoodService;
 import com.lolo.supermarket.util.Result;
 import com.lolo.supermarket.util.ResultGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
 import javax.annotation.Resource;
 import java.util.List;
 
@@ -24,7 +22,9 @@ public class GoodsController {
     @Resource
     GoodsMapper goodsMapper;
 
-    //3.商品需要按权重在首页进行展示，每类商品展示权重前2的，相同权重则优先选取创建时间晚的
+
+
+    //商品需要按权重在首页进行展示，每类商品展示权重前2的，相同权重则优先选取创建时间晚的
     @GetMapping("/retrieve-all")
     public Result retrieveAll() {
         Goods[] data = goodService.selectAll();
@@ -165,8 +165,8 @@ public class GoodsController {
 
     // 购物车：加入购物车
     @PostMapping("/create-car-good")
-    public Result createCarGood(@RequestBody UserCar userCar) {
-        int result = goodService.createCarGood(userCar);
+    public Result createCarGood(@RequestBody GoodCar goodCar) {
+        int result = goodService.createCarGood(goodCar);
         if (result == -1) {
             return ResultGenerator.fail(ResultEnum.STOCK_ERROR.getCode(),
                     ResultEnum.STOCK_ERROR.getMes());
@@ -177,14 +177,22 @@ public class GoodsController {
 
     //修改购物车内商品的数量
     @PostMapping("/update-car-good-num")
-    public Result updateCarGoodNum(@RequestBody UserCar userCar) {
-        boolean result = goodService.updateCarGoodNum(userCar);
+    public Result updateCarGoodNum(@RequestBody GoodCar goodCar) {
+        boolean result = goodService.updateCarGoodNum(goodCar);
         if(result == true){
             return ResultGenerator.success();
         }else{
             return ResultGenerator.fail(ResultEnum.STOCK_ERROR.getCode(),
                     ResultEnum.STOCK_ERROR.getMes());
         }
+
+    }
+
+    //下订单
+    @PostMapping("/orders")
+    public Result orders(@RequestBody GoodCar goodCar){
+        goodService.orders(goodCar);
+        return ResultGenerator.success();
 
     }
 }

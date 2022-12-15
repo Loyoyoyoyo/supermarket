@@ -5,7 +5,7 @@ import java.util.Date;
 
 @Data
 @TableName("user_car")
-public class UserCar {
+public class GoodCar {
     @TableId(value = "id",type = IdType.AUTO)
     private int id;
     private int userId;

@@ -11,8 +11,6 @@ public class DateConfig implements MetaObjectHandler {
     @Override
     public void insertFill(MetaObject metaObject) {
         //设置属性值
-        this.setFieldValByName("goodCreateTime",new Date(),metaObject);
-        this.setFieldValByName("goodUpdateTime",new Date(),metaObject);
         this.setFieldValByName("createTime",new Date(),metaObject);
         this.setFieldValByName("updateTime",new Date(),metaObject);
 
@@ -20,8 +18,6 @@ public class DateConfig implements MetaObjectHandler {
 
     @Override
     public void updateFill(MetaObject metaObject) {
-
-        this.setFieldValByName("goodUpdateTime",new Date(),metaObject);
         this.setFieldValByName("updateTime",new Date(),metaObject);
     }
 }
