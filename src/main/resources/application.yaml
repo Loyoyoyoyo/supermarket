@@ -1,0 +1,9 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/lolomarket
+    username: root
+    password: 2161475wqyjj
+    driver-class-name: com.mysql.jdbc.Driver
+
+
+
