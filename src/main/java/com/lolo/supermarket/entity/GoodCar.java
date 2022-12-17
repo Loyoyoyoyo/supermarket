@@ -15,4 +15,16 @@ public class GoodCar {
     private Date createTime;
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Date updateTime;
+
+    @Override
+    public String toString() {
+        return "GoodCar{" +
+                "id=" + id +
+                ", userId=" + userId +
+                ", goodId=" + goodId +
+                ", goodNum=" + goodNum +
+                ", createTime=" + createTime +
+                ", updateTime=" + updateTime +
+                '}';
+    }
 }

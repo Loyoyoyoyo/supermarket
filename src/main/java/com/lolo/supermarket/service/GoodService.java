@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.LinkedList;
 import java.util.List;
 
 @Service
@@ -252,53 +253,101 @@ public class GoodService {
      * 增加订单记录，用户购买后，记录用户的购买信息（忽略用户付款，后续增加）
      * @param goodCar
      */
-    public void orders(GoodCar goodCar){
+    public void orders(GoodCar[] goodCar){
+        //1.创建订单
         //session获取用户id
         User user = (User) httpServletRequest.getSession().getAttribute("user");
-        //1新增订单
-        Orders order =new Orders();
-        order.setGoodId(goodCar.getGoodId());
-        order.setGoodNum(goodCar.getGoodNum());
-        order.setUserId(user.getId());
-        ordersMapper.insert(order);
-        //2更新购物车
-            //获取用户购物车该商品的原本数量
-        QueryWrapper<GoodCar> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("user_id", user.getId())
-                .eq("good_id", goodCar.getGoodId());
-        GoodCar goodCar1 = goodCarMapper.selectOne(queryWrapper);
-            //全买
-        if(goodCar1.getGoodNum() == goodCar.getGoodNum()){
-            goodCarMapper.deleteById(goodCar1.getId());
-        }else{//买部分
-            goodCar1.setGoodNum(goodCar1.getGoodNum()-goodCar.getGoodNum());
-            goodCarMapper.updateById(goodCar1);
+
+        //获取该用户最后一个userOrderId
+        QueryWrapper<Orders> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("user_id",user.getId());
+        List<Orders> orderList = ordersMapper.selectList(queryWrapper);
+        int userOrderId = 1;
+        if(!orderList.isEmpty()){
+            userOrderId = orderList.get(orderList.size()-1).getUserOrderId()+1;
         }
+        for (int i = 0; i < goodCar.length; i++) {
+            Orders order =new Orders();
+            order.setGoodId(goodCar[i].getGoodId());
+            order.setGoodNum(goodCar[i].getGoodNum());
+            order.setUserId(user.getId());
+            order.setUserOrderId(userOrderId);
+            ordersMapper.insert(order);
+        }
+
+        //2.更新购物车
+
+        //原本的购物车
+        QueryWrapper<GoodCar> queryWrapper1 = new QueryWrapper<>();
+        queryWrapper.eq("user_id", user.getId());
+        List<GoodCar> oldGoodCarList = goodCarMapper.selectList(queryWrapper1);
+        for (GoodCar newGoodCar:goodCar) {
+            for (GoodCar oldGoodCar:oldGoodCarList) {
+                if(oldGoodCar.getGoodId() == newGoodCar.getGoodId()){
+                      //全买
+                    if(oldGoodCar.getGoodNum().equals(newGoodCar.getGoodNum())){
+                        UpdateWrapper<GoodCar> updateWrapper = new UpdateWrapper<>();
+                        updateWrapper.eq("user_id",user.getId())
+                                .eq("good_id",oldGoodCar.getGoodId());
+                        goodCarMapper.delete(updateWrapper);
+                    }else{//买部分
+                        oldGoodCar.setGoodNum(oldGoodCar.getGoodNum()-newGoodCar.getGoodNum());
+                        goodCarMapper.updateById(oldGoodCar);
+                    }
+                }
+            }
+        }
+
         //3更新库存
-        Goods goods = goodsMapper.selectById(goodCar.getGoodId());
-        goods.setStock(goods.getStock()-goodCar.getGoodNum());
-        goodsMapper.updateById(goods);
+        for (GoodCar newGoodCar: goodCar
+             ) {
+            Goods goods = goodsMapper.selectById(newGoodCar.getGoodId());
+            goods.setStock(goods.getStock()-newGoodCar.getGoodNum());
+            goodsMapper.updateById(goods);
+        }
     }
 
     /**
      * 用户可以查看自己的订单
      */
-    public List<Orders> retrieveOrders(){
+    public List<List<Orders>> retrieveOrders(){
         //session获取用户id
         User user = (User) httpServletRequest.getSession().getAttribute("user");
         QueryWrapper<Orders> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("user_id",user.getId());
         List<Orders> ordersList = ordersMapper.selectList(queryWrapper);
-        return ordersList;
+        int userOrderId = ordersList.get(ordersList.size()-1).getUserOrderId();
+        List<List<Orders>> resultList = new LinkedList<>();
+        for (int i = 1; i <= userOrderId ; i++) {
+            QueryWrapper<Orders> queryWrapper1 = new QueryWrapper<>();
+            queryWrapper1.eq("user_id",user.getId())
+                    .eq("user_order_id",i);
+            List<Orders> result = ordersMapper.selectList(queryWrapper1);
+            resultList.add(result);
+        }
+        return resultList;
     }
 
     /**
      * 管理员可以查看任意用户的订单
      */
     public List<Orders> retrieveAllOrders(Orders orders){
+
         QueryWrapper<Orders> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("user_id",orders.getUserId());
         List<Orders> ordersList = ordersMapper.selectList(queryWrapper);
+        if(ordersList == null){
+            return null;
+        }
+        int userOrderId = ordersList.get(ordersList.size()-1).getUserOrderId();
+        List<List<Orders>> resultList = new LinkedList<>();
+        for (int i = 1; i <= userOrderId ; i++) {
+            QueryWrapper<Orders> queryWrapper1 = new QueryWrapper<>();
+            queryWrapper1.eq("user_id",orders.getUserId())
+                    .eq("user_order_id",i);
+            List<Orders> result = ordersMapper.selectList(queryWrapper1);
+            resultList.add(result);
+        }
         return ordersList;
     }
 

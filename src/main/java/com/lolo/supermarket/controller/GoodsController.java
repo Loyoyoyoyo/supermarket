@@ -1,16 +1,15 @@
 package com.lolo.supermarket.controller;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.lolo.supermarket.common.ResultEnum;
 import com.lolo.supermarket.dao.GoodsMapper;
+import com.lolo.supermarket.dao.UserMapper;
+import com.lolo.supermarket.entity.GoodCar;
 import com.lolo.supermarket.entity.GoodRetrieveName;
 import com.lolo.supermarket.entity.Goods;
-import com.lolo.supermarket.entity.GoodCar;
 import com.lolo.supermarket.entity.Orders;
 import com.lolo.supermarket.service.GoodService;
 import com.lolo.supermarket.util.Result;
 import com.lolo.supermarket.util.ResultGenerator;
-import org.apache.ibatis.annotations.ResultType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,6 +21,9 @@ import java.util.List;
 public class GoodsController {
     @Autowired
     GoodService goodService;
+
+    @Resource
+    UserMapper userMapper;
 
     @Resource
     GoodsMapper goodsMapper;
@@ -239,14 +241,22 @@ public class GoodsController {
 
     //下订单
     @PostMapping("/orders")
-    public Result orders(@RequestBody GoodCar goodCar) {
+    public Result orders(@RequestBody GoodCar[] goodCar) {
         //参数错误
-        if (goodCar.getGoodNum() == null
-                || goodCar.getGoodNum() < 0
-                || goodCar.getGoodId() == null) {
+        if(goodCar.length == 0){
             return ResultGenerator.fail(ResultEnum.PARAM_ERROR.getCode(),
                     ResultEnum.PARAM_ERROR.getMes());
         }
+        for (int i = 0; i < goodCar.length; i++) {
+            if (goodCar[i].getGoodNum() == null
+                    || goodCar[i].getGoodNum() < 0
+                    || goodCar[i].getGoodId() == null) {
+                return ResultGenerator.fail(ResultEnum.PARAM_ERROR.getCode(),
+                        ResultEnum.PARAM_ERROR.getMes());
+            }
+        }
+
+
         goodService.orders(goodCar);
         return ResultGenerator.success();
 
@@ -255,8 +265,12 @@ public class GoodsController {
     //查看订单
     @GetMapping("/retrieve-orders")
     public Result retrieveOrders() {
-
-        return ResultGenerator.successData(goodService.retrieveOrders());
+        List<List<Orders>> result = goodService.retrieveOrders();
+        if(result == null){
+            return ResultGenerator.fail(ResultEnum.ORDER_ERROR.getCode(),
+                    ResultEnum.ORDER_ERROR.getMes());
+        }
+        return ResultGenerator.successData(result);
     }
 
     //查看任意订单
@@ -267,6 +281,18 @@ public class GoodsController {
             return ResultGenerator.fail(ResultEnum.PARAM_ERROR.getCode(),
                     ResultEnum.PARAM_ERROR.getMes());
         }
-        return ResultGenerator.successData(goodService.retrieveAllOrders(orders));
+        //用户不存在
+        if(userMapper.selectById(orders.getUserId()) == null){
+            return ResultGenerator.fail(ResultEnum.USER_ERROR.getCode(),
+                    ResultEnum.USER_ERROR.getMes());
+        }
+        //订单为空
+        if(goodService.retrieveAllOrders(orders) == null){
+            return ResultGenerator.fail(ResultEnum.ORDER_ERROR.getCode(),
+                    ResultEnum.ORDER_ERROR.getMes());
+        }else{
+            return ResultGenerator.successData(goodService.retrieveAllOrders(orders));
+        }
+
     }
 }
