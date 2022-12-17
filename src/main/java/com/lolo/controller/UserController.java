@@ -1,13 +1,13 @@
-package com.lolo.supermarket.controller;
+package com.lolo.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.lolo.supermarket.common.ResultEnum;
-import com.lolo.supermarket.dao.UserMapper;
-import com.lolo.supermarket.entity.User;
-import com.lolo.supermarket.service.UserService;
-import com.lolo.supermarket.util.Result;
-import com.lolo.supermarket.util.ResultGenerator;
-import com.lolo.supermarket.util.Valid;
+import com.lolo.service.UserService;
+import com.lolo.common.ResultEnum;
+import com.lolo.dao.UserMapper;
+import com.lolo.entity.User;
+import com.lolo.util.Result;
+import com.lolo.util.ResultGenerator;
+import com.lolo.util.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;

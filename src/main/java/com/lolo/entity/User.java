@@ -1,4 +1,4 @@
-package com.lolo.supermarket.entity;
+package com.lolo.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;

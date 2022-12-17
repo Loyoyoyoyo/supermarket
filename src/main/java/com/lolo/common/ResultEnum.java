@@ -1,17 +1,20 @@
-package com.lolo.supermarket.common;
+package com.lolo.common;
 
 public enum ResultEnum {
     success(10000,"成功"),
-    PARAM_ERROR(0,"参数错误"),
-    PASS_ERROR(00,"密码错误"),
-    STOCK_ERROR(000,"商品库存不足"),
-    USER_ERROR(-1,"用户不存在"),
-    TYPE_EROOR(-11,"商品类别不存在"),
-    GOOD_ERROR(-111,"商品不存在"),
-    ORDER_ERROR(-1111,"订单不存在"),
-    CAR_ERROR(-11111,"购物车不存在该商品"),
-    USER_ERROR2(1,"用户已存在"),
-    GOOD_ERROR2(11,"商品已存在");
+    PARAM_ERROR(1,"参数错误"),
+    PASS_ERROR(2,"密码错误"),
+    STOCK_ERROR(3,"商品库存不足"),
+    CAR_MORE_ERROR(4,"超过购物车数量"),
+
+    CAR_ERROR(10,"购物车不存在该商品"),
+    USER_ERROR(20,"用户不存在"),
+    TYPE_EROOR(30,"商品类别不存在"),
+    GOOD_ERROR(40,"商品不存在"),
+    ORDER_ERROR(50,"订单不存在"),
+
+    USER_ERROR2(100,"用户已存在"),
+    GOOD_ERROR2(200,"商品已存在");
 
 
 

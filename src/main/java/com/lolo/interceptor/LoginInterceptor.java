@@ -1,7 +1,7 @@
 package com.lolo.interceptor;
-import com.lolo.supermarket.entity.User;
-import com.lolo.supermarket.util.Result;
-import com.lolo.supermarket.util.ResultGenerator;
+import com.lolo.entity.User;
+import com.lolo.util.Result;
+import com.lolo.util.ResultGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
@@ -11,8 +11,7 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.io.PrintWriter;
-import java.util.Map;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Controller

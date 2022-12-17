@@ -1,9 +1,9 @@
-package com.lolo.supermarket.service;
+package com.lolo.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
-import com.lolo.supermarket.dao.UserMapper;
-import com.lolo.supermarket.entity.User;
+import com.lolo.dao.UserMapper;
+import com.lolo.entity.User;
 import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 

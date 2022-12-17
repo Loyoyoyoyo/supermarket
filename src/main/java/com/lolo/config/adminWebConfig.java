@@ -1,4 +1,4 @@
-package com.lolo.supermarket.config;
+package com.lolo.config;
 
 import com.lolo.interceptor.LoginInterceptor;
 import org.springframework.context.annotation.Configuration;

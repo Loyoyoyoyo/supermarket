@@ -1,4 +1,4 @@
-package com.lolo.supermarket.util;
+package com.lolo.util;
 
 import java.util.regex.Pattern;
 

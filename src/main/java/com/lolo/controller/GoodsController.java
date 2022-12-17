@@ -1,15 +1,16 @@
-package com.lolo.supermarket.controller;
+package com.lolo.controller;
 
-import com.lolo.supermarket.common.ResultEnum;
-import com.lolo.supermarket.dao.GoodsMapper;
-import com.lolo.supermarket.dao.UserMapper;
-import com.lolo.supermarket.entity.GoodCar;
-import com.lolo.supermarket.entity.GoodRetrieveName;
-import com.lolo.supermarket.entity.Goods;
-import com.lolo.supermarket.entity.Orders;
-import com.lolo.supermarket.service.GoodService;
-import com.lolo.supermarket.util.Result;
-import com.lolo.supermarket.util.ResultGenerator;
+import com.lolo.dao.UserMapper;
+import com.lolo.entity.Goods;
+import com.lolo.exception.NotEnoughException;
+import com.lolo.common.ResultEnum;
+import com.lolo.dao.GoodsMapper;
+import com.lolo.entity.GoodCar;
+import com.lolo.entity.GoodRetrieveName;
+import com.lolo.entity.Orders;
+import com.lolo.service.GoodService;
+import com.lolo.util.Result;
+import com.lolo.util.ResultGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,9 +25,6 @@ public class GoodsController {
 
     @Resource
     UserMapper userMapper;
-
-    @Resource
-    GoodsMapper goodsMapper;
 
     //商品需要按权重在首页进行展示，每类商品展示权重前2的，相同权重则优先选取创建时间晚的
     @GetMapping("/retrieve-all")
@@ -241,8 +239,14 @@ public class GoodsController {
 
     //下订单
     @PostMapping("/orders")
-    public Result orders(@RequestBody GoodCar[] goodCar) {
+    public Result orders(@RequestBody GoodCar[] goodCar) throws NotEnoughException {
+        //TODO
         //参数错误
+        //什么都不输入：goodCar=null  输入一个括号，内容为空：goodCar.length
+//        if(goodCar == null){
+//            return ResultGenerator.fail(ResultEnum.PARAM_ERROR.getCode(),
+//                    ResultEnum.PARAM_ERROR.getMes());
+//        }
         if(goodCar.length == 0){
             return ResultGenerator.fail(ResultEnum.PARAM_ERROR.getCode(),
                     ResultEnum.PARAM_ERROR.getMes());
@@ -255,8 +259,6 @@ public class GoodsController {
                         ResultEnum.PARAM_ERROR.getMes());
             }
         }
-
-
         goodService.orders(goodCar);
         return ResultGenerator.success();
 

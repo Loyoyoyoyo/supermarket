@@ -1,4 +1,4 @@
-package com.lolo.supermarket.config;
+package com.lolo.config;
 
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
 import org.apache.ibatis.reflection.MetaObject;

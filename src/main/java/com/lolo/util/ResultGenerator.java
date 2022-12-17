@@ -1,6 +1,6 @@
-package com.lolo.supermarket.util;
+package com.lolo.util;
 
-import com.lolo.supermarket.common.ResultEnum;
+import com.lolo.common.ResultEnum;
 
 
 public class ResultGenerator {

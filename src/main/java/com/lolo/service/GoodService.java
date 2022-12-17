@@ -1,14 +1,13 @@
-package com.lolo.supermarket.service;
-
+package com.lolo.service;
+import com.lolo.dao.GoodCarMapper;
+import com.lolo.dao.OrdersMapper;
+import com.lolo.entity.*;
+import com.lolo.exception.NotEnoughException;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
-import com.lolo.supermarket.common.ResultEnum;
-import com.lolo.supermarket.dao.OrdersMapper;
-import com.lolo.supermarket.entity.*;
-import com.lolo.supermarket.dao.GoodsMapper;
-import com.lolo.supermarket.dao.GoodCarMapper;
-import com.lolo.supermarket.util.ResultGenerator;
+import com.lolo.dao.GoodsMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -210,7 +209,7 @@ public class GoodService {
      * 修改购物车内商品的数量
      */
     public int updateCarGoodNum(GoodCar goodCar) {
-        //TODO 如果商品不存在 如果购物车不存在
+
         //商品不存在
         if(goodsMapper.selectById(goodCar.getGoodId()) == null){
             return -1;
@@ -253,15 +252,21 @@ public class GoodService {
      * 增加订单记录，用户购买后，记录用户的购买信息（忽略用户付款，后续增加）
      * @param goodCar
      */
-    public void orders(GoodCar[] goodCar){
+    @Transactional(rollbackFor = NotEnoughException.class)
+    public void orders(GoodCar[] goodCar) throws NotEnoughException {
         //1.创建订单
         //session获取用户id
         User user = (User) httpServletRequest.getSession().getAttribute("user");
-
+        //判断购物车
+        //判断订单
+        QueryWrapper<GoodCar> queryWrapper1 = new QueryWrapper<>();
+        queryWrapper1.eq("user_id", user.getId());
+        List<GoodCar> oldGoodCarList = goodCarMapper.selectList(queryWrapper1);
         //获取该用户最后一个userOrderId
         QueryWrapper<Orders> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("user_id",user.getId());
         List<Orders> orderList = ordersMapper.selectList(queryWrapper);
+        //TODO 没有订单的时候
         int userOrderId = 1;
         if(!orderList.isEmpty()){
             userOrderId = orderList.get(orderList.size()-1).getUserOrderId()+1;
@@ -278,22 +283,26 @@ public class GoodService {
         //2.更新购物车
 
         //原本的购物车
-        QueryWrapper<GoodCar> queryWrapper1 = new QueryWrapper<>();
-        queryWrapper.eq("user_id", user.getId());
-        List<GoodCar> oldGoodCarList = goodCarMapper.selectList(queryWrapper1);
+
         for (GoodCar newGoodCar:goodCar) {
             for (GoodCar oldGoodCar:oldGoodCarList) {
                 if(oldGoodCar.getGoodId() == newGoodCar.getGoodId()){
                       //全买
-                    if(oldGoodCar.getGoodNum().equals(newGoodCar.getGoodNum())){
+                    int oldNum = oldGoodCar.getGoodNum().intValue();
+                    int newNum = newGoodCar.getGoodNum().intValue();
+                    if(oldNum == newNum){
                         UpdateWrapper<GoodCar> updateWrapper = new UpdateWrapper<>();
                         updateWrapper.eq("user_id",user.getId())
                                 .eq("good_id",oldGoodCar.getGoodId());
                         goodCarMapper.delete(updateWrapper);
-                    }else{//买部分
+                        //TODO 1. 买成负数 2.如果失败前面的操作得回滚
+                    }else if(newNum < oldNum){//买部分
                         oldGoodCar.setGoodNum(oldGoodCar.getGoodNum()-newGoodCar.getGoodNum());
                         goodCarMapper.updateById(oldGoodCar);
+                    }else if(newNum > oldNum){
+                        throw new NotEnoughException();
                     }
+                    break;
                 }
             }
         }
@@ -301,6 +310,7 @@ public class GoodService {
         //3更新库存
         for (GoodCar newGoodCar: goodCar
              ) {
+            //TODO 检查库存
             Goods goods = goodsMapper.selectById(newGoodCar.getGoodId());
             goods.setStock(goods.getStock()-newGoodCar.getGoodNum());
             goodsMapper.updateById(goods);
@@ -311,6 +321,7 @@ public class GoodService {
      * 用户可以查看自己的订单
      */
     public List<List<Orders>> retrieveOrders(){
+        //TODO {订单号：1，data：[{},{}.{}]}
         //session获取用户id
         User user = (User) httpServletRequest.getSession().getAttribute("user");
         QueryWrapper<Orders> queryWrapper = new QueryWrapper<>();
