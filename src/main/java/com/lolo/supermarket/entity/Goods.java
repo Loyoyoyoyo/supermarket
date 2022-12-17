@@ -7,14 +7,14 @@ import java.util.Date;
 @TableName("goods")
 public class Goods {
     @TableId(value = "id",type = IdType.AUTO)
-    private int id;
+    private Integer id;
     private String goodType;
     private String goodName;
-    private int stock;
+    private Integer stock;
     @TableField(fill = FieldFill.INSERT)
     private Date createTime;
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Date updateTime;
-    private int weight;
+    private Integer weight;
 
 }

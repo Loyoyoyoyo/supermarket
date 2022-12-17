@@ -7,10 +7,10 @@ import java.util.Date;
 @TableName("user_car")
 public class GoodCar {
     @TableId(value = "id",type = IdType.AUTO)
-    private int id;
-    private int userId;
-    private int goodId;
-    private int goodNum;
+    private Integer id;
+    private Integer  userId;
+    private Integer  goodId;
+    private Integer  goodNum;
     @TableField(fill = FieldFill.INSERT)
     private Date createTime;
     @TableField(fill = FieldFill.INSERT_UPDATE)

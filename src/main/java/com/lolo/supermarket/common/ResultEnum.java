@@ -9,7 +9,8 @@ public enum ResultEnum {
     GOOD_ERROR(-11,"商品不存在"),
     GOOD_ERROR2(-22,"商品已存在"),
     TYPE_EROOR(-33,"商品类别不存在"),
-    STOCK_ERROR(-44,"商品库存不足");
+    STOCK_ERROR(-44,"商品库存不足"),
+    CAR_ERROR(-55,"购物车不存在该商品");
 
 
     private int code;

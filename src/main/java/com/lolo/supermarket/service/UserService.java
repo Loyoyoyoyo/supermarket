@@ -1,13 +1,10 @@
 package com.lolo.supermarket.service;
 
-import com.baomidou.mybatisplus.core.conditions.query.Query;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
-import com.lolo.supermarket.entity.User;
 import com.lolo.supermarket.dao.UserMapper;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.lolo.supermarket.entity.User;
 import org.springframework.stereotype.Service;
-
 import javax.annotation.Resource;
 
 @Service

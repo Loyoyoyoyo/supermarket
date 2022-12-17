@@ -9,10 +9,10 @@ import java.util.Date;
 @TableName("orders")
 public class Orders {
     @TableId(value = "id",type = IdType.AUTO)
-    private int id;
-    private int userId;
-    private int goodId;
-    private int goodNum;
+    private Integer  id;
+    private Integer  userId;
+    private Integer  goodId;
+    private Integer  goodNum;
     @TableField(fill = FieldFill.INSERT)
     private Date createTime;
 }
