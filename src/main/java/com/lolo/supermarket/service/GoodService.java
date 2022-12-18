@@ -311,6 +311,9 @@ public class GoodService {
         for (GoodCar newGoodCar: goodCar
              ) {
             Goods goods = goodsMapper.selectById(newGoodCar.getGoodId());
+            if(goods.getStock()<newGoodCar.getGoodNum()){
+                throw new NotEnoughException("超过库存数量");
+            }
             goods.setStock(goods.getStock()-newGoodCar.getGoodNum());
             goodsMapper.updateById(goods);
         }
