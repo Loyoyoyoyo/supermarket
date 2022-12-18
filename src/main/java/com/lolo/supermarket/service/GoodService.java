@@ -10,6 +10,7 @@ import com.lolo.supermarket.dao.GoodCarMapper;
 import com.lolo.supermarket.exception.NotEnoughException;
 import com.lolo.supermarket.util.ResultGenerator;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -254,6 +255,7 @@ public class GoodService {
      * 增加订单记录，用户购买后，记录用户的购买信息（忽略用户付款，后续增加）
      * @param goodCar
      */
+    @Transactional(rollbackFor = NotEnoughException.class)
     public void orders(GoodCar[] goodCar) throws NotEnoughException{
         //1.创建订单
         //session获取用户id
@@ -298,7 +300,7 @@ public class GoodService {
                         oldGoodCar.setGoodNum(oldGoodCar.getGoodNum()-newGoodCar.getGoodNum());
                         goodCarMapper.updateById(oldGoodCar);
                     }else if(newNum > oldNum){
-                        throw new NotEnoughException();
+                        throw new NotEnoughException("超过购物车数量");
                     }
                     break;
                 }
