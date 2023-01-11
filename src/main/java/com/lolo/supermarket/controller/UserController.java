@@ -55,7 +55,7 @@ public class UserController {
 
     }
 
-    //登录
+    //用户名登录
     @PostMapping("/sign-in-by-name")
     public Result signInByName(@RequestBody User user) {
         //1 获取 Subject 对象
@@ -75,7 +75,26 @@ public class UserController {
             return ResultGenerator.fail(ResultEnum.PASS_ERROR.getCode(),ResultEnum.PASS_ERROR.getMes());
         }
     }
-
+    // 邮箱登录
+    @PostMapping("/sign-in-by-email")
+    public Result signInByEmail(@RequestBody User user) {
+        //1 获取 Subject 对象
+        Subject subject =SecurityUtils.getSubject();
+        //2 封装请求数据到 token 对象中
+        AuthenticationToken token = new
+                UsernamePasswordToken(user.getEmail(),user.getPassword());
+        //3 调用 login 方法进行登录认证
+        try {
+            subject.login(token);
+            return ResultGenerator.successMes("登录成功");
+        } catch (UnknownAccountException e) {
+            e.printStackTrace();
+            return ResultGenerator.fail(ResultEnum.USER_ERROR.getCode(),ResultEnum.USER_ERROR.getMes());
+        }catch(IncorrectCredentialsException e){
+            e.printStackTrace();
+            return ResultGenerator.fail(ResultEnum.PASS_ERROR.getCode(),ResultEnum.PASS_ERROR.getMes());
+        }
+    }
 
     @PostMapping("/re-pass")
     public Result rePass(@RequestBody User user) {

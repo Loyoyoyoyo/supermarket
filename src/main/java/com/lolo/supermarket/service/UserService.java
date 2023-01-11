@@ -19,7 +19,14 @@ public class UserService {
         queryWrapper.eq("username",name);
         return userMapper.selectOne(queryWrapper);
     }
-
+    /**
+     * 根据邮箱获取用户
+     */
+    public User getUserByEmail(String email){
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("email",email);
+        return userMapper.selectOne(queryWrapper);
+    }
     /**
      * 注册
      * @param user
