@@ -1,6 +1,6 @@
 package com.lolo.supermarket.controller;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+
 import com.lolo.supermarket.common.ResultEnum;
 import com.lolo.supermarket.dao.UserMapper;
 import com.lolo.supermarket.entity.User;
@@ -8,10 +8,14 @@ import com.lolo.supermarket.service.UserService;
 import com.lolo.supermarket.util.Result;
 import com.lolo.supermarket.util.ResultGenerator;
 import com.lolo.supermarket.util.Valid;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authc.*;
+import org.apache.shiro.subject.Subject;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.Resource;
+
 import javax.servlet.http.HttpServletRequest;
 
 
@@ -52,34 +56,26 @@ public class UserController {
     }
 
     //登录
-    @PostMapping("/sign-in")
-    public Result signIn(@RequestBody User user, HttpServletRequest req) {
-        //为空
-        if (user.getEmail() == null || user.getPassword() == null) {
-            return ResultGenerator.fail(ResultEnum.PARAM_ERROR.getCode(),
-                    ResultEnum.PARAM_ERROR.getMes());
+    @PostMapping("/sign-in-by-name")
+    public Result signInByName(@RequestBody User user) {
+        //1 获取 Subject 对象
+        Subject subject =SecurityUtils.getSubject();
+        //2 封装请求数据到 token 对象中
+        AuthenticationToken token = new
+                UsernamePasswordToken(user.getUsername(),user.getPassword());
+        //3 调用 login 方法进行登录认证
+        try {
+            subject.login(token);
+            return ResultGenerator.successMes("登录成功");
+        } catch (UnknownAccountException e) {
+            e.printStackTrace();
+            return ResultGenerator.fail(ResultEnum.USER_ERROR.getCode(),ResultEnum.USER_ERROR.getMes());
+        }catch(IncorrectCredentialsException e){
+            e.printStackTrace();
+            return ResultGenerator.fail(ResultEnum.PASS_ERROR.getCode(),ResultEnum.PASS_ERROR.getMes());
         }
-
-        int result = userService.signIn(user);
-
-        //用户不存在
-        if (result == -1) {
-            return ResultGenerator.fail(ResultEnum.USER_ERROR.getCode(),
-                    ResultEnum.USER_ERROR.getMes());
-        }
-        //密码错误
-        if (result == 1) {
-            return ResultGenerator.fail(ResultEnum.PASS_ERROR.getCode(),
-                    ResultEnum.PASS_ERROR.getMes());
-        }
-        //给cookie
-        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("email",user.getEmail());
-        User user1 = userMapper.selectOne(queryWrapper);
-        req.getSession().setAttribute("user",user1);
-        return ResultGenerator.success();
-
     }
+
 
     @PostMapping("/re-pass")
     public Result rePass(@RequestBody User user) {

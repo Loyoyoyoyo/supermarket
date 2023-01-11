@@ -114,7 +114,7 @@ public class GoodsController {
                     ResultEnum.GOOD_ERROR2.getMes());
         } else {
             int id = goods.getId();
-            return ResultGenerator.successMes(id);
+            return ResultGenerator.successMes("商品的id为"+id);
         }
     }
 

@@ -1,5 +1,5 @@
 package com.lolo.supermarket.service;
-
+import com.lolo.supermarket.util.ShiroMD5;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.lolo.supermarket.dao.UserMapper;
@@ -11,6 +11,14 @@ import javax.annotation.Resource;
 public class UserService {
     @Resource
     UserMapper userMapper;
+    /**
+     * 根据名字获取用户
+     */
+    public User getUserByName(String name){
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("username",name);
+        return userMapper.selectOne(queryWrapper);
+    }
 
     /**
      * 注册
@@ -24,6 +32,7 @@ public class UserService {
         if(userMapper.selectOne(queryWrapper)!= null){
             return -1;
         }
+        user.setPassword(ShiroMD5.ShiroMD5Hash(user.getPassword()));
         userMapper.insert(user);
         return 0;
     }

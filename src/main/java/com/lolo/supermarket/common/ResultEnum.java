@@ -2,6 +2,7 @@ package com.lolo.supermarket.common;
 
 public enum ResultEnum {
     success(10000,"成功"),
+    LOGIN_ERROR(20000,"登录失败"),
     PARAM_ERROR(0,"参数错误"),
     PASS_ERROR(00,"密码错误"),
     STOCK_ERROR(000,"商品库存不足"),
