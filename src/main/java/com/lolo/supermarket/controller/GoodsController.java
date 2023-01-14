@@ -10,6 +10,7 @@ import com.lolo.supermarket.exception.NotEnoughException;
 import com.lolo.supermarket.service.GoodService;
 import com.lolo.supermarket.util.Result;
 import com.lolo.supermarket.util.ResultGenerator;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -93,7 +94,7 @@ public class GoodsController {
     }
 
     //创建商品
-    @RequiresRoles("administrators")
+    @RequiresPermissions("admin:create")
     @PostMapping("/create")
     public Result create(@RequestBody Goods goods) {
         //输入为空

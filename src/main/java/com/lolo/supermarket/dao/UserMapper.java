@@ -16,5 +16,17 @@ public interface UserMapper extends BaseMapper<User> {
             "\tSELECT id FROM user WHERE username = #{princial}))")
     List<String> RoleInfoByUserMapper(@Param("principal") String principal);
 
+    @Select({
+            "<script>",
+            "select info from permission where id in(",
+            "select pid from role_permission where rid in(",
+            "select id from role where name in",
+            "<foreach collection='roles' item='name' open='(' separator=',' close=')'>",
+            "#{name}",
+            "</foreach>",
+            "))",
+            "</script>"
+    })
+    List<String> PermissionInfoByRoleMapper(@Param("roles") List<String> roles);
 
 }

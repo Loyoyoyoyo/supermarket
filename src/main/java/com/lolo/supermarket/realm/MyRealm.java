@@ -24,15 +24,16 @@ public class MyRealm extends AuthorizingRealm {
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principalCollection) {
         System.out.println("进入自定义授权方法");
         //获取当前用户身份信息
-        String principal =
-                principalCollection.getPrimaryPrincipal().toString();
+        String principal = principalCollection.getPrimaryPrincipal().toString();
         //调用接口方法获取用户的角色信息
         List<String> roles = userService.RoleInfoByUser(principal);
         System.out.println("当前用户角色信息： "+roles);
+        List<String> permissions = userService.PermissionInfoByRole(roles);
         //创建对象，存储当前登录的用户的权限和角色
         SimpleAuthorizationInfo info = new SimpleAuthorizationInfo();
         //存储角色
         info.addRoles(roles);
+        info.addStringPermissions(permissions);
         //返回
         return info;
 
