@@ -13,7 +13,7 @@ import java.util.List;
 public interface UserMapper extends BaseMapper<User> {
     @Select("SELECT name FROM role WHERE id IN(\n" +
             "\tSELECT rid FROM user_role WHERE uid =(\n" +
-            "\tSELECT id FROM user WHERE username = #{princial}))")
+            "\tSELECT id FROM user WHERE username = #{principal}))")
     List<String> RoleInfoByUserMapper(@Param("principal") String principal);
 
     @Select({
