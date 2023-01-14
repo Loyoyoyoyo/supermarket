@@ -11,6 +11,7 @@ import com.lolo.supermarket.util.Valid;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.*;
 import org.apache.shiro.subject.Subject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,10 +23,8 @@ import javax.servlet.http.HttpServletRequest;
 @RestController
 public class UserController {
 
-    @Resource
+    @Autowired
     UserService userService;
-    @Resource
-    UserMapper userMapper;
 
     //注册
     @PostMapping("/sign-up")

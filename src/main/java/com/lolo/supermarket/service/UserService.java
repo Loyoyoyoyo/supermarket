@@ -4,12 +4,13 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.lolo.supermarket.dao.UserMapper;
 import com.lolo.supermarket.entity.User;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import javax.annotation.Resource;
+import java.util.List;
 
 @Service
 public class UserService {
-    @Resource
+    @Autowired
     UserMapper userMapper;
     /**
      * 根据名字获取用户
@@ -27,6 +28,16 @@ public class UserService {
         queryWrapper.eq("email",email);
         return userMapper.selectOne(queryWrapper);
     }
+
+    /**
+     * 根据用户获取角色
+     */
+    public List<String> RoleInfoByUser(String username){
+        return userMapper.RoleInfoByUserMapper(username);
+    }
+
+
+
     /**
      * 注册
      * @param user

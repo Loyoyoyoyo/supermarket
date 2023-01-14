@@ -1,7 +1,6 @@
 package com.lolo.supermarket.controller;
 
 import com.lolo.supermarket.common.ResultEnum;
-import com.lolo.supermarket.dao.GoodsMapper;
 import com.lolo.supermarket.dao.UserMapper;
 import com.lolo.supermarket.entity.GoodCar;
 import com.lolo.supermarket.entity.GoodRetrieveName;
@@ -11,10 +10,10 @@ import com.lolo.supermarket.exception.NotEnoughException;
 import com.lolo.supermarket.service.GoodService;
 import com.lolo.supermarket.util.Result;
 import com.lolo.supermarket.util.ResultGenerator;
+import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @RequestMapping("/good")
@@ -23,13 +22,12 @@ public class GoodsController {
     @Autowired
     GoodService goodService;
 
-    @Resource
+    @Autowired
     UserMapper userMapper;
 
-    @Resource
-    GoodsMapper goodsMapper;
 
     //商品需要按权重在首页进行展示，每类商品展示权重前2的，相同权重则优先选取创建时间晚的
+
     @GetMapping("/retrieve-all")
     public Result retrieveAll() {
         Goods[] data = goodService.selectAll();
@@ -95,6 +93,7 @@ public class GoodsController {
     }
 
     //创建商品
+    @RequiresRoles("administrators")
     @PostMapping("/create")
     public Result create(@RequestBody Goods goods) {
         //输入为空
@@ -194,13 +193,13 @@ public class GoodsController {
 
     // 购物车：加入购物车
     @PostMapping("/create-car-good")
-    public Result createCarGood(@RequestBody GoodCar goodCar) {
+    public Result createCarGood(@RequestBody GoodCar goodCar, HttpServletRequest httpServletRequest) {
         // 参数错误
         if (goodCar.getGoodId() == null || goodCar.getGoodNum() == null) {
             return ResultGenerator.fail(ResultEnum.PARAM_ERROR.getCode(),
                     ResultEnum.PARAM_ERROR.getMes());
         }
-        int result = goodService.createCarGood(goodCar);
+        int result = goodService.createCarGood(goodCar,httpServletRequest);
         if (result == -1) {
             return ResultGenerator.fail(ResultEnum.GOOD_ERROR.getCode(),
                     ResultEnum.GOOD_ERROR.getMes());
@@ -215,7 +214,7 @@ public class GoodsController {
 
     //修改购物车内商品的数量
     @PostMapping("/update-car-good-num")
-    public Result updateCarGoodNum(@RequestBody GoodCar goodCar) {
+    public Result updateCarGoodNum(@RequestBody GoodCar goodCar,HttpServletRequest httpServletRequest) {
         //参数错误
         if (goodCar.getGoodNum() == null
                 || goodCar.getGoodNum() < 0
@@ -223,7 +222,7 @@ public class GoodsController {
             return ResultGenerator.fail(ResultEnum.PARAM_ERROR.getCode(),
                     ResultEnum.PARAM_ERROR.getMes());
         }
-        int result = goodService.updateCarGoodNum(goodCar);
+        int result = goodService.updateCarGoodNum(goodCar,httpServletRequest);
         if (result == -1) {
             return ResultGenerator.fail(ResultEnum.GOOD_ERROR.getCode(),
                     ResultEnum.GOOD_ERROR.getMes());
@@ -242,7 +241,7 @@ public class GoodsController {
 
     //下订单
     @PostMapping("/orders")
-    public Result orders(@RequestBody GoodCar[] goodCar) throws NotEnoughException {
+    public Result orders(@RequestBody GoodCar[] goodCar,HttpServletRequest httpServletRequest) throws NotEnoughException {
         //参数错误
         if(goodCar.length == 0){
             return ResultGenerator.fail(ResultEnum.PARAM_ERROR.getCode(),
@@ -258,15 +257,15 @@ public class GoodsController {
         }
 
 
-        goodService.orders(goodCar);
+        goodService.orders(goodCar,httpServletRequest);
         return ResultGenerator.success();
 
     }
 
     //查看订单
     @GetMapping("/retrieve-orders")
-    public Result retrieveOrders() {
-        List<List<Orders>> result = goodService.retrieveOrders();
+    public Result retrieveOrders(HttpServletRequest httpServletRequest) {
+        List<List<Orders>> result = goodService.retrieveOrders(httpServletRequest);
         if(result == null){
             return ResultGenerator.fail(ResultEnum.ORDER_ERROR.getCode(),
                     ResultEnum.ORDER_ERROR.getMes());
