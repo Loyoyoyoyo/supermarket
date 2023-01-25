@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class MyRealm2 extends AuthorizingRealm{
+public class MyRealm2 extends AuthorizingRealm {
     @Autowired
     UserService userService;
 
@@ -27,7 +27,7 @@ public class MyRealm2 extends AuthorizingRealm{
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken) throws AuthenticationException {
         String email = authenticationToken.getPrincipal().toString();
         User user = userService.getUserByEmail(email);
-        if(user!=null){
+        if (user != null) {
             AuthenticationInfo authenticationInfo = new SimpleAuthenticationInfo(
                     authenticationToken.getPrincipal(),
                     user.getPassword(),

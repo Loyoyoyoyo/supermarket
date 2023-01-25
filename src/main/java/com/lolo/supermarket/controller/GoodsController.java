@@ -14,6 +14,7 @@ import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
@@ -94,6 +95,7 @@ public class GoodsController {
     }
 
     //创建商品
+
     @RequiresPermissions("admin:create")
     @PostMapping("/create")
     public Result create(@RequestBody Goods goods) {
@@ -114,7 +116,7 @@ public class GoodsController {
                     ResultEnum.GOOD_ERROR2.getMes());
         } else {
             int id = goods.getId();
-            return ResultGenerator.successMes("商品的id为"+id);
+            return ResultGenerator.successMes("商品的id为" + id);
         }
     }
 
@@ -200,7 +202,7 @@ public class GoodsController {
             return ResultGenerator.fail(ResultEnum.PARAM_ERROR.getCode(),
                     ResultEnum.PARAM_ERROR.getMes());
         }
-        int result = goodService.createCarGood(goodCar,httpServletRequest);
+        int result = goodService.createCarGood(goodCar, httpServletRequest);
         if (result == -1) {
             return ResultGenerator.fail(ResultEnum.GOOD_ERROR.getCode(),
                     ResultEnum.GOOD_ERROR.getMes());
@@ -215,7 +217,7 @@ public class GoodsController {
 
     //修改购物车内商品的数量
     @PostMapping("/update-car-good-num")
-    public Result updateCarGoodNum(@RequestBody GoodCar goodCar,HttpServletRequest httpServletRequest) {
+    public Result updateCarGoodNum(@RequestBody GoodCar goodCar, HttpServletRequest httpServletRequest) {
         //参数错误
         if (goodCar.getGoodNum() == null
                 || goodCar.getGoodNum() < 0
@@ -223,7 +225,7 @@ public class GoodsController {
             return ResultGenerator.fail(ResultEnum.PARAM_ERROR.getCode(),
                     ResultEnum.PARAM_ERROR.getMes());
         }
-        int result = goodService.updateCarGoodNum(goodCar,httpServletRequest);
+        int result = goodService.updateCarGoodNum(goodCar, httpServletRequest);
         if (result == -1) {
             return ResultGenerator.fail(ResultEnum.GOOD_ERROR.getCode(),
                     ResultEnum.GOOD_ERROR.getMes());
@@ -242,9 +244,9 @@ public class GoodsController {
 
     //下订单
     @PostMapping("/orders")
-    public Result orders(@RequestBody GoodCar[] goodCar,HttpServletRequest httpServletRequest) throws NotEnoughException {
+    public Result orders(@RequestBody GoodCar[] goodCar, HttpServletRequest httpServletRequest) throws NotEnoughException {
         //参数错误
-        if(goodCar.length == 0){
+        if (goodCar.length == 0) {
             return ResultGenerator.fail(ResultEnum.PARAM_ERROR.getCode(),
                     ResultEnum.PARAM_ERROR.getMes());
         }
@@ -258,7 +260,7 @@ public class GoodsController {
         }
 
 
-        goodService.orders(goodCar,httpServletRequest);
+        goodService.orders(goodCar, httpServletRequest);
         return ResultGenerator.success();
 
     }
@@ -267,7 +269,7 @@ public class GoodsController {
     @GetMapping("/retrieve-orders")
     public Result retrieveOrders(HttpServletRequest httpServletRequest) {
         List<List<Orders>> result = goodService.retrieveOrders(httpServletRequest);
-        if(result == null){
+        if (result == null) {
             return ResultGenerator.fail(ResultEnum.ORDER_ERROR.getCode(),
                     ResultEnum.ORDER_ERROR.getMes());
         }
@@ -283,15 +285,15 @@ public class GoodsController {
                     ResultEnum.PARAM_ERROR.getMes());
         }
         //用户不存在
-        if(userMapper.selectById(orders.getUserId()) == null){
+        if (userMapper.selectById(orders.getUserId()) == null) {
             return ResultGenerator.fail(ResultEnum.USER_ERROR.getCode(),
                     ResultEnum.USER_ERROR.getMes());
         }
         //订单为空
-        if(goodService.retrieveAllOrders(orders) == null){
+        if (goodService.retrieveAllOrders(orders) == null) {
             return ResultGenerator.fail(ResultEnum.ORDER_ERROR.getCode(),
                     ResultEnum.ORDER_ERROR.getMes());
-        }else{
+        } else {
             return ResultGenerator.successData(goodService.retrieveAllOrders(orders));
         }
 

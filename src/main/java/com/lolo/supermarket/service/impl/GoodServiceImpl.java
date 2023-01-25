@@ -10,6 +10,7 @@ import com.lolo.supermarket.exception.NotEnoughException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
+
 import javax.servlet.http.HttpServletRequest;
 import java.util.LinkedList;
 import java.util.List;
@@ -25,7 +26,6 @@ public class GoodServiceImpl implements com.lolo.supermarket.service.GoodService
 
 
     /**
-     *
      * @return
      */
     @Override
@@ -37,7 +37,7 @@ public class GoodServiceImpl implements com.lolo.supermarket.service.GoodService
             QueryWrapper<Goods> userQueryWrapper = new QueryWrapper<>();
             userQueryWrapper.like("good_type", type)
                     .orderByDesc("weight")
-                    .orderByAsc("good_create_time");
+                    .orderByAsc("create_time");
             List<Goods> goodList = goodsMapper.selectList(userQueryWrapper);
             result[i] = goodList.get(0);
             result[i + 1] = goodList.get(1);
@@ -48,6 +48,7 @@ public class GoodServiceImpl implements com.lolo.supermarket.service.GoodService
 
     /**
      * 按id查商品
+     *
      * @param goods
      * @return
      */
@@ -76,6 +77,7 @@ public class GoodServiceImpl implements com.lolo.supermarket.service.GoodService
 
     /**
      * 可以按名称搜索商品，并且按权重排序。支持 按种类搜索、不分种类搜索 两种方式
+     *
      * @param
      * @param
      * @return
@@ -94,6 +96,7 @@ public class GoodServiceImpl implements com.lolo.supermarket.service.GoodService
 
     /**
      * 管理员可以添加商品
+     *
      * @param good
      * @return
      */
@@ -111,6 +114,7 @@ public class GoodServiceImpl implements com.lolo.supermarket.service.GoodService
 
     /**
      * 管理员可以删除商品
+     *
      * @param goods
      */
     @Override
@@ -126,6 +130,7 @@ public class GoodServiceImpl implements com.lolo.supermarket.service.GoodService
 
     /**
      * 管理员可以修改商品权重
+     *
      * @param goods
      * @return
      */
@@ -145,6 +150,7 @@ public class GoodServiceImpl implements com.lolo.supermarket.service.GoodService
 
     /**
      * 管理员可以修改商品名称
+     *
      * @param goods
      * @return
      */
@@ -182,9 +188,9 @@ public class GoodServiceImpl implements com.lolo.supermarket.service.GoodService
      * 3.用户可以添加商品进购物车
      */
     @Override
-    public int createCarGood(GoodCar goodCar,HttpServletRequest httpServletRequest) {
+    public int createCarGood(GoodCar goodCar, HttpServletRequest httpServletRequest) {
         //商品不存在
-        if(goodsMapper.selectById(goodCar.getGoodId()) == null){
+        if (goodsMapper.selectById(goodCar.getGoodId()) == null) {
             return -1;
         }
         //库存不足
@@ -217,10 +223,10 @@ public class GoodServiceImpl implements com.lolo.supermarket.service.GoodService
      * 修改购物车内商品的数量
      */
     @Override
-    public int updateCarGoodNum(GoodCar goodCar,HttpServletRequest httpServletRequest) {
+    public int updateCarGoodNum(GoodCar goodCar, HttpServletRequest httpServletRequest) {
 
         //商品不存在
-        if(goodsMapper.selectById(goodCar.getGoodId()) == null){
+        if (goodsMapper.selectById(goodCar.getGoodId()) == null) {
             return -1;
         }
 
@@ -232,7 +238,7 @@ public class GoodServiceImpl implements com.lolo.supermarket.service.GoodService
                 .eq("good_id", goodCar.getGoodId());
         GoodCar goodCar1 = goodCarMapper.selectOne(queryWrapper);
         //购物车里不存在
-        if(goodCar1==null){
+        if (goodCar1 == null) {
             return -2;
         }
 
@@ -259,25 +265,26 @@ public class GoodServiceImpl implements com.lolo.supermarket.service.GoodService
 
     /**
      * 增加订单记录，用户购买后，记录用户的购买信息（忽略用户付款，后续增加）
+     *
      * @param goodCar
      */
     @Override
     @Transactional(rollbackFor = NotEnoughException.class)
-    public void orders(GoodCar[] goodCar,HttpServletRequest httpServletRequest) throws NotEnoughException{
+    public void orders(GoodCar[] goodCar, HttpServletRequest httpServletRequest) throws NotEnoughException {
         //1.创建订单
         //session获取用户id
         User user = (User) httpServletRequest.getSession().getAttribute("user");
 
         //获取该用户最后一个userOrderId
         QueryWrapper<Orders> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("user_id",user.getId());
+        queryWrapper.eq("user_id", user.getId());
         List<Orders> orderList = ordersMapper.selectList(queryWrapper);
         int userOrderId = 1;
-        if(!orderList.isEmpty()){
-            userOrderId = orderList.get(orderList.size()-1).getUserOrderId()+1;
+        if (!orderList.isEmpty()) {
+            userOrderId = orderList.get(orderList.size() - 1).getUserOrderId() + 1;
         }
         for (int i = 0; i < goodCar.length; i++) {
-            Orders order =new Orders();
+            Orders order = new Orders();
             order.setGoodId(goodCar[i].getGoodId());
             order.setGoodNum(goodCar[i].getGoodNum());
             order.setUserId(user.getId());
@@ -291,22 +298,22 @@ public class GoodServiceImpl implements com.lolo.supermarket.service.GoodService
         QueryWrapper<GoodCar> queryWrapper1 = new QueryWrapper<>();
         queryWrapper.eq("user_id", user.getId());
         List<GoodCar> oldGoodCarList = goodCarMapper.selectList(queryWrapper1);
-        for (GoodCar newGoodCar:goodCar) {
-            for (GoodCar oldGoodCar:oldGoodCarList) {
-                if(oldGoodCar.getGoodId() == newGoodCar.getGoodId()){
+        for (GoodCar newGoodCar : goodCar) {
+            for (GoodCar oldGoodCar : oldGoodCarList) {
+                if (oldGoodCar.getGoodId() == newGoodCar.getGoodId()) {
                     //全买
                     int oldNum = oldGoodCar.getGoodNum().intValue();
                     int newNum = newGoodCar.getGoodNum().intValue();
-                    if(oldNum == newNum){
+                    if (oldNum == newNum) {
                         UpdateWrapper<GoodCar> updateWrapper = new UpdateWrapper<>();
-                        updateWrapper.eq("user_id",user.getId())
-                                .eq("good_id",oldGoodCar.getGoodId());
+                        updateWrapper.eq("user_id", user.getId())
+                                .eq("good_id", oldGoodCar.getGoodId());
                         goodCarMapper.delete(updateWrapper);
 
-                    }else if(newNum < oldNum){//买部分
-                        oldGoodCar.setGoodNum(oldGoodCar.getGoodNum()-newGoodCar.getGoodNum());
+                    } else if (newNum < oldNum) {//买部分
+                        oldGoodCar.setGoodNum(oldGoodCar.getGoodNum() - newGoodCar.getGoodNum());
                         goodCarMapper.updateById(oldGoodCar);
-                    }else if(newNum > oldNum){
+                    } else if (newNum > oldNum) {
                         throw new NotEnoughException("超过购物车数量");
                     }
                     break;
@@ -315,13 +322,13 @@ public class GoodServiceImpl implements com.lolo.supermarket.service.GoodService
         }
 
         //3更新库存
-        for (GoodCar newGoodCar: goodCar
+        for (GoodCar newGoodCar : goodCar
         ) {
             Goods goods = goodsMapper.selectById(newGoodCar.getGoodId());
-            if(goods.getStock()<newGoodCar.getGoodNum()){
+            if (goods.getStock() < newGoodCar.getGoodNum()) {
                 throw new NotEnoughException("超过库存数量");
             }
-            goods.setStock(goods.getStock()-newGoodCar.getGoodNum());
+            goods.setStock(goods.getStock() - newGoodCar.getGoodNum());
             goodsMapper.updateById(goods);
         }
     }
@@ -330,18 +337,18 @@ public class GoodServiceImpl implements com.lolo.supermarket.service.GoodService
      * 用户可以查看自己的订单
      */
     @Override
-    public List<List<Orders>> retrieveOrders(HttpServletRequest httpServletRequest){
+    public List<List<Orders>> retrieveOrders(HttpServletRequest httpServletRequest) {
         //session获取用户id
         User user = (User) httpServletRequest.getSession().getAttribute("user");
         QueryWrapper<Orders> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("user_id",user.getId());
+        queryWrapper.eq("user_id", user.getId());
         List<Orders> ordersList = ordersMapper.selectList(queryWrapper);
-        int userOrderId = ordersList.get(ordersList.size()-1).getUserOrderId();
+        int userOrderId = ordersList.get(ordersList.size() - 1).getUserOrderId();
         List<List<Orders>> resultList = new LinkedList<>();
-        for (int i = 1; i <= userOrderId ; i++) {
+        for (int i = 1; i <= userOrderId; i++) {
             QueryWrapper<Orders> queryWrapper1 = new QueryWrapper<>();
-            queryWrapper1.eq("user_id",user.getId())
-                    .eq("user_order_id",i);
+            queryWrapper1.eq("user_id", user.getId())
+                    .eq("user_order_id", i);
             List<Orders> result = ordersMapper.selectList(queryWrapper1);
             resultList.add(result);
         }
@@ -352,20 +359,20 @@ public class GoodServiceImpl implements com.lolo.supermarket.service.GoodService
      * 管理员可以查看任意用户的订单
      */
     @Override
-    public List<Orders> retrieveAllOrders(Orders orders){
+    public List<Orders> retrieveAllOrders(Orders orders) {
 
         QueryWrapper<Orders> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("user_id",orders.getUserId());
+        queryWrapper.eq("user_id", orders.getUserId());
         List<Orders> ordersList = ordersMapper.selectList(queryWrapper);
-        if(ordersList == null){
+        if (ordersList == null) {
             return null;
         }
-        int userOrderId = ordersList.get(ordersList.size()-1).getUserOrderId();
+        int userOrderId = ordersList.get(ordersList.size() - 1).getUserOrderId();
         List<List<Orders>> resultList = new LinkedList<>();
-        for (int i = 1; i <= userOrderId ; i++) {
+        for (int i = 1; i <= userOrderId; i++) {
             QueryWrapper<Orders> queryWrapper1 = new QueryWrapper<>();
-            queryWrapper1.eq("user_id",orders.getUserId())
-                    .eq("user_order_id",i);
+            queryWrapper1.eq("user_id", orders.getUserId())
+                    .eq("user_order_id", i);
             List<Orders> result = ordersMapper.selectList(queryWrapper1);
             resultList.add(result);
         }
