@@ -7,4 +7,5 @@ import java.util.List;
 public interface ActivityService {
     List<Activity> retrieveAll();
     int create(Activity activity);
+    int delete(int id);
 }

@@ -33,4 +33,15 @@ public class ActivityServiceImpl implements ActivityService{
         activityMapper.insert(activity);
         return 0;
     }
+
+    @Override
+    public int delete(int id) {
+        QueryWrapper<Activity> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("id",id);
+        if(activityMapper.selectOne(queryWrapper)==null){
+            return -1;
+        }
+        activityMapper.deleteById(id);
+        return 0;
+    }
 }
