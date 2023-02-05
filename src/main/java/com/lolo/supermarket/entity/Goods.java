@@ -12,6 +12,7 @@ public class Goods {
     private Integer id;
     private String goodType;
     private String goodName;
+    private String goodBrand;
     private Integer stock;
     @TableField(fill = FieldFill.INSERT)
     private Date createTime;

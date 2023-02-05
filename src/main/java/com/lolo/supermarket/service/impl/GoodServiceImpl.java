@@ -103,7 +103,8 @@ public class GoodServiceImpl implements com.lolo.supermarket.service.GoodService
     @Override
     public int addGood(Goods good) {
         QueryWrapper<Goods> queryWrapper = new QueryWrapper<>();
-        queryWrapper.like("good_name", good.getGoodName());
+        queryWrapper.like("good_name", good.getGoodName())
+                .like("good_brand",good.getGoodBrand());
         //商品已存在
         if (goodsMapper.selectOne(queryWrapper) != null) {
             return -1;

@@ -95,8 +95,6 @@ public class GoodsController {
     }
 
     //创建商品
-
-    @RequiresPermissions("admin:create")
     @PostMapping("/create")
     public Result create(@RequestBody Goods goods) {
         //输入为空
@@ -105,6 +103,7 @@ public class GoodsController {
                 goods.getStock() == null ||
                 goods.getWeight() == null ||
                 goods.getWeight() < 0 ||
+                goods.getGoodBrand() == null||
                 goods.getStock() < 0) {
 
             return ResultGenerator.fail(ResultEnum.PARAM_ERROR.getCode(),
