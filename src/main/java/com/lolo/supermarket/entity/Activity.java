@@ -21,4 +21,5 @@ public class Activity {
     private String type;
     private String goodBrand;
     private String goodType;
+    private int status;
 }

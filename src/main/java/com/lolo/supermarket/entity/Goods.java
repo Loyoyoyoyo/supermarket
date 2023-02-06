@@ -14,6 +14,8 @@ public class Goods {
     private String goodName;
     private String goodBrand;
     private Integer stock;
+    private Double price;
+    private Double activityPrice;
     @TableField(fill = FieldFill.INSERT)
     private Date createTime;
     @TableField(fill = FieldFill.INSERT_UPDATE)

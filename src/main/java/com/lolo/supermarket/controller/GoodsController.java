@@ -102,6 +102,7 @@ public class GoodsController {
                 goods.getGoodType() == null ||
                 goods.getStock() == null ||
                 goods.getWeight() == null ||
+                goods.getPrice() <0 ||
                 goods.getWeight() < 0 ||
                 goods.getGoodBrand() == null||
                 goods.getStock() < 0) {
@@ -240,6 +241,9 @@ public class GoodsController {
         }
 
     }
+
+    //查看购物车 计算总价
+
 
     //下订单
     @PostMapping("/orders")
