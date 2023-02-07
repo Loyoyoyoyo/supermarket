@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
-
 import java.util.Date;
 
 @Data
@@ -21,5 +20,6 @@ public class Activity {
     private String type;
     private String goodBrand;
     private String goodType;
+    private String calculate;
     private int status;
 }
