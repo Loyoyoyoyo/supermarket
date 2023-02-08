@@ -14,8 +14,8 @@ public enum ResultEnum {
     CAR_ERROR(-11111, "购物车不存在该商品"),
     USER_ERROR2(1, "用户已存在"),
     GOOD_ERROR2(11, "商品已存在"),
-    ACTIVI_ERROR2(111,"活动已存在");
-
+    ACTIVI_ERROR2(111,"活动已存在"),
+    ACTIVI_ERROR3(1111,"该类商品已有同类型活动");
 
     private int code;
     private String mes;

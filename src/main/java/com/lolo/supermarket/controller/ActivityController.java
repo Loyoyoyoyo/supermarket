@@ -16,8 +16,8 @@ public class ActivityController {
     ActivityService activityService;
 
     /**
-     * 查看所有活动
-     *
+     * 查看所有活动（包括未开始和已结束的）
+     * 管理员特有
      * @return
      */
     @GetMapping("/retrieve-all")
@@ -27,9 +27,17 @@ public class ActivityController {
     }
 
     /**
+     * 查看进行中的活动
+     */
+    @GetMapping("/retrieve-two")
+    public Result retrieveTwo(){
+        List<Activity> data = activityService.retrieveTwo();
+        return ResultGenerator.successData(data);
+    }
+
+    /**
      * 增加活动
      */
-
     @PostMapping("/create")
     public Result create(@RequestBody Activity activity) {
         //非空检查
@@ -51,12 +59,15 @@ public class ActivityController {
             return ResultGenerator.fail(ResultEnum.PARAM_ERROR.getCode(),
                     ResultEnum.PARAM_ERROR.getMes());
         }
-        //品牌不检查（可以活动后再进驻）
         int result = activityService.create(activity);
         if (result == -1) {
             return ResultGenerator.fail(ResultEnum.ACTIVI_ERROR2.getCode(),
                     ResultEnum.ACTIVI_ERROR2.getMes());
-        } else {
+        } else if(result == -2){
+            return ResultGenerator.fail(ResultEnum.ACTIVI_ERROR3.getCode(),
+                    ResultEnum.ACTIVI_ERROR3.getMes());
+        }
+        else {
             return ResultGenerator.successData(activity.getId());
         }
 
