@@ -32,6 +32,8 @@ public interface GoodService {
 
     int updateCarGoodNum(GoodCar goodCar, HttpServletRequest httpServletRequest);
 
+    double goodCarSum(HttpServletRequest httpServletRequest);
+
     void orders(GoodCar[] goodCar, HttpServletRequest httpServletRequest) throws NotEnoughException;
 
     List<List<Orders>> retrieveOrders(HttpServletRequest httpServletRequest);

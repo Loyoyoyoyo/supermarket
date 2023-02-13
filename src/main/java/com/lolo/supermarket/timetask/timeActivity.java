@@ -30,9 +30,9 @@ public class timeActivity {
     ActivityGoodMapper activityGoodMapper;
 
     //整点检查一次activity数据表（活动开始一般是整点）
-//    @Scheduled(cron = "0 0 0/1 * * ? ")
+    @Scheduled(cron = "0 0 0/1 * * ? ")
     //测试用
-    @Scheduled(cron = "* * 0/1 * * ? ")
+    //@Scheduled(cron = "* * 0/1 * * ? ")
     public void activity() {
         log.info("检查activity");
         QueryWrapper<Activity> queryWrapper = new QueryWrapper<>();

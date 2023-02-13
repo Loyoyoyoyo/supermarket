@@ -34,6 +34,13 @@ public class ShiroConfig {
     MyRealm2 myRealm2;
 
     @Bean
+    public AuthorizationAttributeSourceAdvisor authorizationAttributeSourceAdvisor() {
+        AuthorizationAttributeSourceAdvisor authorizationAttributeSourceAdvisor = new AuthorizationAttributeSourceAdvisor();
+        authorizationAttributeSourceAdvisor.setSecurityManager(defaultWebSecurityManager());
+        return authorizationAttributeSourceAdvisor;
+    }
+
+    @Bean
     public DefaultWebSecurityManager defaultWebSecurityManager() {
         //1 创建 defaultWebSecurityManager 对象
         DefaultWebSecurityManager defaultWebSecurityManager = new DefaultWebSecurityManager();
@@ -97,15 +104,10 @@ public class ShiroConfig {
     public DefaultAdvisorAutoProxyCreator advisorAutoProxyCreator() {
         DefaultAdvisorAutoProxyCreator advisorAutoProxyCreator = new DefaultAdvisorAutoProxyCreator();
         advisorAutoProxyCreator.setProxyTargetClass(true);
+        advisorAutoProxyCreator.setUsePrefix(true);
         return advisorAutoProxyCreator;
     }
 
-    @Bean
-    public AuthorizationAttributeSourceAdvisor authorizationAttributeSourceAdvisor() {
-        AuthorizationAttributeSourceAdvisor authorizationAttributeSourceAdvisor = new AuthorizationAttributeSourceAdvisor();
-        authorizationAttributeSourceAdvisor.setSecurityManager(defaultWebSecurityManager());
-        return authorizationAttributeSourceAdvisor;
-    }
 
 //    //这四个bean是shiro整合redis的
 //    @Value("${spring.redis.host}")

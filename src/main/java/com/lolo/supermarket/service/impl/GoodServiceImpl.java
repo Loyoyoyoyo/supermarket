@@ -2,16 +2,20 @@ package com.lolo.supermarket.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.lolo.supermarket.dao.ActivityMapper;
 import com.lolo.supermarket.dao.GoodCarMapper;
 import com.lolo.supermarket.dao.GoodsMapper;
 import com.lolo.supermarket.dao.OrdersMapper;
 import com.lolo.supermarket.entity.*;
 import com.lolo.supermarket.exception.NotEnoughException;
+import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -23,6 +27,8 @@ public class GoodServiceImpl implements com.lolo.supermarket.service.GoodService
     GoodCarMapper goodCarMapper;
     @Autowired
     OrdersMapper ordersMapper;
+    @Autowired
+    ActivityMapper activityMapper;
 
 
     /**
@@ -104,7 +110,7 @@ public class GoodServiceImpl implements com.lolo.supermarket.service.GoodService
     public int addGood(Goods good) {
         QueryWrapper<Goods> queryWrapper = new QueryWrapper<>();
         queryWrapper.like("good_name", good.getGoodName())
-                .like("good_brand",good.getGoodBrand());
+                .like("good_brand", good.getGoodBrand());
         //商品已存在
         if (goodsMapper.selectOne(queryWrapper) != null) {
             return -1;
@@ -265,6 +271,97 @@ public class GoodServiceImpl implements com.lolo.supermarket.service.GoodService
     }
 
     /**
+     * 计算购物车总价
+     *
+     * @param httpServletRequest
+     * @return
+     */
+
+    @Override
+    public double goodCarSum(HttpServletRequest httpServletRequest) {
+        //session获取用户id
+        User user = (User) SecurityUtils.getSubject().getPrincipal();
+        double sum = 0;
+        //获取满减活动
+        QueryWrapper<Activity> queryWrapper1 = new QueryWrapper<>();
+        queryWrapper1.eq("status", 2);
+        queryWrapper1.eq("type", "满减");
+        List<Activity> activities = activityMapper.selectList(queryWrapper1);
+        Iterator iterator0 = activities.iterator();
+        //获取该用户的购物车记录
+        QueryWrapper<GoodCar> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("user_id", user.getId());
+        //总List：把满足满减的放进分list里计算价格，并从总List删去，最后计算没有参加满减的总list       的总价
+        List<GoodCar> goodCars = goodCarMapper.selectList(queryWrapper);
+        // 1如果有满减活动，就看看购物车里有没有参加满减的商品以及是否满足金额
+        if (activities != null) {
+            // 活动迭代器
+            while (iterator0.hasNext()) {
+                Object next0 = iterator0.next();
+                Activity activity = (Activity) next0;
+                // 解析出两个数  满多少  减多少
+                String[] strings = activity.getCalculate().split("-");
+                int enough = Integer.parseInt(strings[0]);
+                int cut = Integer.parseInt(strings[1]);
+                double sum_list = 0;
+                List<GoodCar> good_list = new ArrayList<>();
+                // 商品迭代器
+                Iterator iterator = goodCars.iterator();
+                while (iterator.hasNext()) {
+                    Object next = iterator.next();
+                    GoodCar goodCar = (GoodCar) next;
+                    String GoodBrand = goodsMapper.selectById(goodCar.getGoodId()).getGoodBrand();
+                    String GoodType = goodsMapper.selectById(goodCar.getGoodId()).getGoodType();
+                    if (activity.getGoodType().equals(GoodType) && activity.getGoodBrand().equals(GoodBrand)) {
+                        // 加入good_list
+                        good_list.add(goodCar);
+                        // 往sum_list加钱（有减价和打折要加活动价
+                        Double activityPrice = goodsMapper.selectById(goodCar.getGoodId()).getActivityPrice();
+                        if (activityPrice != null) {
+                            sum_list += activityPrice * goodCar.getGoodNum();
+                        }
+                        if (activityPrice == null) {
+                            // 根据goodCar的goodId获取good的Price
+                            Double price = goodsMapper.selectById(goodCar.getGoodId()).getPrice();
+                            sum_list += price * goodCar.getGoodNum();
+                        }
+                    }
+                }
+                // 如果够满减
+                if (sum_list > enough || sum_list == enough) {
+                    // 1 把sum_list加入总sum
+                    sum_list -= cut;
+                    sum += sum_list;
+                    // 2 把物品从总list删去
+                    iterator = goodCars.iterator();
+                    while (iterator.hasNext()) {
+                        Object next = iterator.next();
+                        GoodCar goodCar1 = (GoodCar) next;
+                        goodCars.remove(goodCar1);
+                    }
+                }//如果没有达到满减金额就还是放在总list里
+
+            }
+
+        } // 2计算没有参加满减的总list
+        Iterator iterator1 = goodCars.iterator();
+        while (iterator1.hasNext()) {
+            Object next = iterator1.next();
+            GoodCar goodCar = (GoodCar) next;
+            Double activityPrice = goodsMapper.selectById(goodCar.getGoodId()).getActivityPrice();
+            if (activityPrice != null) {
+                sum += activityPrice * goodCar.getGoodNum();
+            }
+            if (activityPrice == null) {
+                // 根据goodCar的goodId获取good的Price
+                Double price = goodsMapper.selectById(goodCar.getGoodId()).getPrice();
+                sum += price * goodCar.getGoodNum();
+            }
+        }
+        return sum;
+    }
+
+    /**
      * 增加订单记录，用户购买后，记录用户的购买信息（忽略用户付款，后续增加）
      *
      * @param goodCar
@@ -272,6 +369,7 @@ public class GoodServiceImpl implements com.lolo.supermarket.service.GoodService
     @Override
     @Transactional(rollbackFor = NotEnoughException.class)
     public void orders(GoodCar[] goodCar, HttpServletRequest httpServletRequest) throws NotEnoughException {
+        //
         //1.创建订单
         //session获取用户id
         User user = (User) httpServletRequest.getSession().getAttribute("user");

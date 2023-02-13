@@ -46,7 +46,8 @@ public class MyRealm extends AuthorizingRealm {
         User user = userService.getUserByName(name);
         if (user != null) {
             AuthenticationInfo info = new SimpleAuthenticationInfo(
-                    authenticationToken.getPrincipal(),
+                    user,
+                    //authenticationToken.getPrincipal(),
                     user.getPassword(),
                     ByteSource.Util.bytes("salt"),
                     authenticationToken.getPrincipal().toString()

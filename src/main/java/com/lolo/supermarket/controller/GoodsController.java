@@ -242,7 +242,13 @@ public class GoodsController {
 
     }
 
-    //查看购物车 计算总价
+    //计算购物车总价
+    @RequestMapping("/good-car-sum")
+    public Result goodCarSum(HttpServletRequest httpServletRequest){
+        Double sum = goodService.goodCarSum(httpServletRequest);
+        return ResultGenerator.successData(sum);
+    }
+
 
 
     //下订单
