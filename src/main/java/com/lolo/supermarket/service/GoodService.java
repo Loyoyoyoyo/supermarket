@@ -1,9 +1,6 @@
 package com.lolo.supermarket.service;
 
-import com.lolo.supermarket.entity.GoodCar;
-import com.lolo.supermarket.entity.GoodRetrieveName;
-import com.lolo.supermarket.entity.Goods;
-import com.lolo.supermarket.entity.Orders;
+import com.lolo.supermarket.entity.*;
 import com.lolo.supermarket.exception.NotEnoughException;
 
 import javax.servlet.http.HttpServletRequest;
@@ -32,7 +29,7 @@ public interface GoodService {
 
     int updateCarGoodNum(GoodCar goodCar, HttpServletRequest httpServletRequest);
 
-    double goodCarSum(HttpServletRequest httpServletRequest);
+    GoodCarSum goodCarSum(HttpServletRequest httpServletRequest);
 
     void orders(GoodCar[] goodCar, HttpServletRequest httpServletRequest) throws NotEnoughException;
 

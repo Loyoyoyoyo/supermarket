@@ -9,6 +9,7 @@ import com.lolo.supermarket.dao.OrdersMapper;
 import com.lolo.supermarket.entity.*;
 import com.lolo.supermarket.exception.NotEnoughException;
 import org.apache.shiro.SecurityUtils;
+import org.omg.PortableInterceptor.Interceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
@@ -278,10 +279,14 @@ public class GoodServiceImpl implements com.lolo.supermarket.service.GoodService
      */
 
     @Override
-    public double goodCarSum(HttpServletRequest httpServletRequest) {
+    public GoodCarSum goodCarSum(HttpServletRequest httpServletRequest) {
         //session获取用户id
         User user = (User) SecurityUtils.getSubject().getPrincipal();
         double sum = 0;
+        //是否曾经记录过总价，默认为没有
+        Integer bool_sum = -1;
+        //
+        GoodCar goodCarSum = new GoodCar();
         //获取满减活动
         QueryWrapper<Activity> queryWrapper1 = new QueryWrapper<>();
         queryWrapper1.eq("status", 2);
@@ -293,6 +298,7 @@ public class GoodServiceImpl implements com.lolo.supermarket.service.GoodService
         queryWrapper.eq("user_id", user.getId());
         //总List：把满足满减的放进分list里计算价格，并从总List删去，最后计算没有参加满减的总list       的总价
         List<GoodCar> goodCars = goodCarMapper.selectList(queryWrapper);
+        int goodNum = goodCars.size();
         // 1如果有满减活动，就看看购物车里有没有参加满减的商品以及是否满足金额
         if (activities != null) {
             // 活动迭代器
@@ -310,6 +316,12 @@ public class GoodServiceImpl implements com.lolo.supermarket.service.GoodService
                 while (iterator.hasNext()) {
                     Object next = iterator.next();
                     GoodCar goodCar = (GoodCar) next;
+                    // 如果是曾经记录的总价 就记录 在循环后删除
+                    if(goodCar.getSum()!= null){
+                        bool_sum = goodCar.getId();
+                        goodCarSum = goodCar;
+                        continue;
+                    }
                     String GoodBrand = goodsMapper.selectById(goodCar.getGoodId()).getGoodBrand();
                     String GoodType = goodsMapper.selectById(goodCar.getGoodId()).getGoodType();
                     if (activity.getGoodType().equals(GoodType) && activity.getGoodBrand().equals(GoodBrand)) {
@@ -327,6 +339,11 @@ public class GoodServiceImpl implements com.lolo.supermarket.service.GoodService
                         }
                     }
                 }
+                // 如果是sum的那条记录，先删掉
+                if(goodCarSum.getSum()!=null){
+                    goodCars.remove(goodCarSum);
+                }
+
                 // 如果够满减
                 if (sum_list > enough || sum_list == enough) {
                     // 1 把sum_list加入总sum
@@ -358,7 +375,8 @@ public class GoodServiceImpl implements com.lolo.supermarket.service.GoodService
                 sum += price * goodCar.getGoodNum();
             }
         }
-        return sum;
+        GoodCarSum goodCarSum1 = new GoodCarSum(user.getId(),goodNum,bool_sum,sum);
+        return goodCarSum1;
     }
 
     /**

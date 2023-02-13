@@ -1,17 +1,15 @@
 package com.lolo.supermarket.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.lolo.supermarket.common.ResultEnum;
+import com.lolo.supermarket.dao.GoodCarMapper;
 import com.lolo.supermarket.dao.UserMapper;
-import com.lolo.supermarket.entity.GoodCar;
-import com.lolo.supermarket.entity.GoodRetrieveName;
-import com.lolo.supermarket.entity.Goods;
-import com.lolo.supermarket.entity.Orders;
+import com.lolo.supermarket.entity.*;
 import com.lolo.supermarket.exception.NotEnoughException;
 import com.lolo.supermarket.service.GoodService;
 import com.lolo.supermarket.util.Result;
 import com.lolo.supermarket.util.ResultGenerator;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,6 +25,8 @@ public class GoodsController {
     @Autowired
     UserMapper userMapper;
 
+    @Autowired
+    GoodCarMapper goodCarMapper;
 
     //商品需要按权重在首页进行展示，每类商品展示权重前2的，相同权重则优先选取创建时间晚的
 
@@ -102,9 +102,9 @@ public class GoodsController {
                 goods.getGoodType() == null ||
                 goods.getStock() == null ||
                 goods.getWeight() == null ||
-                goods.getPrice() <0 ||
+                goods.getPrice() < 0 ||
                 goods.getWeight() < 0 ||
-                goods.getGoodBrand() == null||
+                goods.getGoodBrand() == null ||
                 goods.getStock() < 0) {
 
             return ResultGenerator.fail(ResultEnum.PARAM_ERROR.getCode(),
@@ -244,11 +244,25 @@ public class GoodsController {
 
     //计算购物车总价
     @RequestMapping("/good-car-sum")
-    public Result goodCarSum(HttpServletRequest httpServletRequest){
-        Double sum = goodService.goodCarSum(httpServletRequest);
-        return ResultGenerator.successData(sum);
-    }
+    public Result goodCarSum(HttpServletRequest httpServletRequest) {
+        GoodCarSum goodCarSum = goodService.goodCarSum(httpServletRequest);
+        // 没算过总值 就插入
+        if (goodCarSum.getBool_sum() == -1) {
+            GoodCar goodCar = new GoodCar(goodCarSum.getUserId(),
+                                          goodCarSum.getGoodNum(),
+                                          goodCarSum.getSum());
+            goodCarMapper.insert(goodCar);
+            return ResultGenerator.successData(goodCar);
+        } else {//算过总值 就更新
+            QueryWrapper<GoodCar> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("Id", goodCarSum.getBool_sum());
+            GoodCar goodCar = goodCarMapper.selectOne(queryWrapper);
+            goodCar.setSum(goodCarSum.getSum());
+            goodCarMapper.updateById(goodCar);
+            return ResultGenerator.successData(goodCar);
+        }
 
+    }
 
 
     //下订单

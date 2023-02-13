@@ -17,6 +17,16 @@ public class GoodCar {
     private Date createTime;
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private Date updateTime;
+    private Double sum;
+
+    public GoodCar() {
+    }
+
+    public GoodCar(Integer userId, Integer goodNum, Double sum) {
+        this.userId = userId;
+        this.goodNum = goodNum;
+        this.sum = sum;
+    }
 
     @Override
     public String toString() {
@@ -27,6 +37,7 @@ public class GoodCar {
                 ", goodNum=" + goodNum +
                 ", createTime=" + createTime +
                 ", updateTime=" + updateTime +
+                ", sum=" + sum +
                 '}';
     }
 }
