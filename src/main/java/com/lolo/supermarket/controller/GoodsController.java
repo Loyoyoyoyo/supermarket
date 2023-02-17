@@ -10,10 +10,12 @@ import com.lolo.supermarket.exception.NotEnoughException;
 import com.lolo.supermarket.service.GoodService;
 import com.lolo.supermarket.util.Result;
 import com.lolo.supermarket.util.ResultGenerator;
+import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Iterator;
 import java.util.List;
 
 @RequestMapping("/good")
@@ -243,20 +245,27 @@ public class GoodsController {
     }
 
     //计算购物车总价
+    //实际应该是自动发送请求，实时计算购物车总价
     @RequestMapping("/good-car-sum")
     public Result goodCarSum(HttpServletRequest httpServletRequest) {
-        GoodCarSum goodCarSum = goodService.goodCarSum(httpServletRequest);
+        User user = (User) SecurityUtils.getSubject().getPrincipal();
+        //获取该用户的购物车记录
+        QueryWrapper<GoodCar> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("user_id", user.getId());
+        //总List：把满足满减的放进分list里计算价格，并从总List删去，最后计算没有参加满减的总list       的总价
+        List<GoodCar> goodCars = goodCarMapper.selectList(queryWrapper);
+        GoodCarSum goodCarSum = goodService.goodCarSum(httpServletRequest, goodCars);
         // 没算过总值 就插入
         if (goodCarSum.getBool_sum() == -1) {
-            GoodCar goodCar = new GoodCar(goodCarSum.getUserId(),
-                                          goodCarSum.getGoodNum(),
-                                          goodCarSum.getSum());
+            GoodCar goodCar = new GoodCar(user.getId(),
+                    goodCarSum.getGoodNum(),
+                    goodCarSum.getSum());
             goodCarMapper.insert(goodCar);
             return ResultGenerator.successData(goodCar);
         } else {//算过总值 就更新
-            QueryWrapper<GoodCar> queryWrapper = new QueryWrapper<>();
-            queryWrapper.eq("Id", goodCarSum.getBool_sum());
-            GoodCar goodCar = goodCarMapper.selectOne(queryWrapper);
+            QueryWrapper<GoodCar> queryWrapper1 = new QueryWrapper<>();
+            queryWrapper1.eq("Id", goodCarSum.getBool_sum());
+            GoodCar goodCar = goodCarMapper.selectOne(queryWrapper1);
             goodCar.setSum(goodCarSum.getSum());
             goodCarMapper.updateById(goodCar);
             return ResultGenerator.successData(goodCar);
@@ -264,29 +273,30 @@ public class GoodsController {
 
     }
 
-
-    //下订单
+    // TODO
+    //下订单，可能买购物车的一部分东西
     @PostMapping("/orders")
-    public Result orders(@RequestBody GoodCar[] goodCar, HttpServletRequest httpServletRequest) throws NotEnoughException {
+    public Result orders(@RequestBody List<GoodCar> goodCar, HttpServletRequest httpServletRequest) throws NotEnoughException {
         //参数错误
-        if (goodCar.length == 0) {
+        if (goodCar.size() == 0) {
             return ResultGenerator.fail(ResultEnum.PARAM_ERROR.getCode(),
                     ResultEnum.PARAM_ERROR.getMes());
         }
-        for (int i = 0; i < goodCar.length; i++) {
-            if (goodCar[i].getGoodNum() == null
-                    || goodCar[i].getGoodNum() < 0
-                    || goodCar[i].getGoodId() == null) {
+        Iterator iterator = goodCar.iterator();
+        while (iterator.hasNext()) {
+            Object next = iterator.next();
+            GoodCar goodCar1 = (GoodCar) next;
+            if (goodCar1.getGoodNum() == null
+                    || goodCar1.getGoodNum() < 0
+                    || goodCar1.getGoodId() == null) {
                 return ResultGenerator.fail(ResultEnum.PARAM_ERROR.getCode(),
                         ResultEnum.PARAM_ERROR.getMes());
             }
         }
-
-
         goodService.orders(goodCar, httpServletRequest);
         return ResultGenerator.success();
-
     }
+
 
     //查看订单
     @GetMapping("/retrieve-orders")

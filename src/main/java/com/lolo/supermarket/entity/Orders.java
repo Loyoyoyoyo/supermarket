@@ -16,4 +16,5 @@ public class Orders {
     private Integer goodNum;
     @TableField(fill = FieldFill.INSERT)
     private Date createTime;
+    private double sumPrice;
 }

@@ -16,9 +16,8 @@ public class GoodCarSum {
     private Integer bool_sum;
     private Double sum;
 
-    public GoodCarSum(Integer userId, Integer goodNum, Integer bool_sum, double sum) {
-        this.userId = userId;
-        this.goodNum = goodNum;
+    public GoodCarSum(Integer bool_sum, double sum) {
+
         this.bool_sum = bool_sum;
         this.sum = sum;
     }
